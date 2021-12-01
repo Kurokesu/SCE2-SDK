@@ -7,7 +7,7 @@ Kurokesu SCF2 multi-axis stepper motor controller System On Module (SOM) based m
 * [ ] 3D models
 * [ ] Sample code
 
-## Lenses
+## Fully tested lens with dedicated SCE2-M based controller
 * [x] L086 (x18, 1/1.8")
 * [ ] L084 (x40, 1/1.8")
 * [ ] L085 (x25, 1/2.7")
