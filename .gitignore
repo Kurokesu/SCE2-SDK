@@ -1,2 +1,4 @@
 *.bat
 out
+__pycache__
+*.pyc
