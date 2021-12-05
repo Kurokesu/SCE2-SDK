@@ -590,10 +590,6 @@ class MyWindowClass(QtWidgets.QMainWindow, gui.Ui_MainWindow):
             self.hw.action_recipe.put("version")
             self.hw.action_recipe.put("get_param_list")
             
-            cmd = self.config["lens"][self.lens_name]["limit_sensor"]["led_on"]
-            self.hw.send(cmd+"\n")
-
-
         if text == "Disconnected":
             self.hw_connected = False
 
@@ -643,6 +639,11 @@ class MyWindowClass(QtWidgets.QMainWindow, gui.Ui_MainWindow):
                 self.lens_name = "L086"                
                 self.label_lens_name.setText(self.lens_name)
                 #print(self.config["lens"]["L086"])
+
+                cmd = self.config["lens"][self.lens_name]["limit_sensor"]["led_on"]
+                self.hw.send(cmd+"\n")
+                cmd = self.config["lens"][self.lens_name]["iris"]["open"]
+                self.hw.send(cmd+"\n")
 
                 self.group_step_size.setEnabled(True)
                 self.combo_step.clear()                
