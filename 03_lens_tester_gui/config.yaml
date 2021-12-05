@@ -1,4 +1,4 @@
-boot_count: 135
+boot_count: 141
 clean_exit: true
 com_baud: 115200
 com_timeout: 5
@@ -44,8 +44,8 @@ lens:
 logging_level: DEBUG
 port: COM20
 preset:
-  p1: -- -- -- --
-  p2: -- -- -- --
+  p1: -9.37 -4.8 -2.7 --
+  p2: -7.3 -4.2 -1.8 --
   p3: -- -- -- --
   p4: -- -- -- --
   p5: -- -- -- --

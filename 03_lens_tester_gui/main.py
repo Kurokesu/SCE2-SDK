@@ -960,21 +960,21 @@ class MyWindowClass(QtWidgets.QMainWindow, gui.Ui_MainWindow):
         global config
         global running
 
+        if self.s_status.text() == "Connected":
+            p1 = self.label_pr1_x.text()+" "+self.label_pr1_y.text()+" "+self.label_pr1_z.text()+" "+self.label_pr1_a.text()
+            self.config["preset"]["p1"] = p1
 
-        p1 = self.label_pr1_x.text()+" "+self.label_pr1_y.text()+" "+self.label_pr1_z.text()+" "+self.label_pr1_a.text()
-        self.config["preset"]["p1"] = p1
+            p2 = self.label_pr2_x.text()+" "+self.label_pr2_y.text()+" "+self.label_pr2_z.text()+" "+self.label_pr2_a.text()
+            self.config["preset"]["p2"] = p2
 
-        p2 = self.label_pr2_x.text()+" "+self.label_pr2_y.text()+" "+self.label_pr2_z.text()+" "+self.label_pr2_a.text()
-        self.config["preset"]["p2"] = p2
+            p3 = self.label_pr3_x.text()+" "+self.label_pr3_y.text()+" "+self.label_pr3_z.text()+" "+self.label_pr3_a.text()
+            self.config["preset"]["p3"] = p3
 
-        p3 = self.label_pr3_x.text()+" "+self.label_pr3_y.text()+" "+self.label_pr3_z.text()+" "+self.label_pr3_a.text()
-        self.config["preset"]["p3"] = p3
+            p4 = self.label_pr4_x.text()+" "+self.label_pr4_y.text()+" "+self.label_pr4_z.text()+" "+self.label_pr4_a.text()
+            self.config["preset"]["p4"] = p4
 
-        p4 = self.label_pr4_x.text()+" "+self.label_pr4_y.text()+" "+self.label_pr4_z.text()+" "+self.label_pr4_a.text()
-        self.config["preset"]["p4"] = p4
-
-        p5 = self.label_pr5_x.text()+" "+self.label_pr5_y.text()+" "+self.label_pr5_z.text()+" "+self.label_pr5_a.text()
-        self.config["preset"]["p5"] = p5
+            p5 = self.label_pr5_x.text()+" "+self.label_pr5_y.text()+" "+self.label_pr5_z.text()+" "+self.label_pr5_a.text()
+            self.config["preset"]["p5"] = p5
 
         utils.exit_routine(SETTINGS_FILE, self.config)
         running = False
