@@ -51,7 +51,7 @@ def read_status(ser, echo=True):
     retry_cnt = 0
     ret = ""
     backup_timeout = ser.timeout
-    ser.timeout = 0.02
+    ser.timeout = 0.5
     if echo:
         print("")
         print("> ?")
