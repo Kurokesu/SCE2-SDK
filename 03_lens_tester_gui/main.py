@@ -589,6 +589,10 @@ class MyWindowClass(QtWidgets.QMainWindow, gui.Ui_MainWindow):
             self.hw.action_recipe.put("status1")
             self.hw.action_recipe.put("version")
             self.hw.action_recipe.put("get_param_list")
+            
+            cmd = self.config["lens"][self.lens_name]["limit_sensor"]["led_on"]
+            self.hw.send(cmd+"\n")
+
 
         if text == "Disconnected":
             self.hw_connected = False
@@ -779,30 +783,38 @@ class MyWindowClass(QtWidgets.QMainWindow, gui.Ui_MainWindow):
         if s.limit_x:
             self.label_x_pi.setText('LOW')
             self.label_x_pi.setStyleSheet("color: " + COLOR_RED)
+            self.btn_x_seek.setEnabled(False)
         else:
             self.label_x_pi.setText('HIGH')
             self.label_x_pi.setStyleSheet("")
+            self.btn_x_seek.setEnabled(True)
 
         if s.limit_y:
             self.label_y_pi.setText('LOW')
             self.label_y_pi.setStyleSheet("color: " + COLOR_RED)
+            self.btn_y_seek.setEnabled(False)
         else:
             self.label_y_pi.setText('HIGH')
             self.label_y_pi.setStyleSheet("")
+            self.btn_y_seek.setEnabled(True)
 
         if s.limit_z:
             self.label_z_pi.setText('LOW')
             self.label_z_pi.setStyleSheet("color: " + COLOR_RED)
+            self.btn_z_seek.setEnabled(False)
         else:
             self.label_z_pi.setText('HIGH')
             self.label_z_pi.setStyleSheet("")
+            self.btn_z_seek.setEnabled(True)
 
         if s.limit_a:
             self.label_a_pi.setText('LOW')
             self.label_a_pi.setStyleSheet("color: " + COLOR_RED)
+            self.btn_a_seek.setEnabled(False)
         else:
             self.label_a_pi.setText('HIGH')
             self.label_a_pi.setStyleSheet("")
+            self.btn_a_seek.setEnabled(True)
 
 
         self.label_buffer_count.setText(str(s.block_buffer_avail))

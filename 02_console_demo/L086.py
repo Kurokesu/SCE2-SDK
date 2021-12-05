@@ -34,8 +34,9 @@ grbl_utils.send_command(ser, "M114 P1")
 
 
 # IR CUT filter 
-grbl_utils.send_command(ser, "G90 G1 A0 F1")    # ON (Visible light)
-#grbl_utils.send_command(ser, "G90 G1 A1.1 F1")  # OFF (Full spectrum)
+grbl_utils.send_command(ser, "G90 G1 A0.3 F1")    # ON (Visible light)
+#grbl_utils.send_command(ser, "G90 G1 A0.7 F1")  # OFF (Full spectrum)
+
 
 # Move out of home position X axis, move in small steps. 
 # 1.1f-SCE2.20211130 can't perform precision homing procedure unless motors 

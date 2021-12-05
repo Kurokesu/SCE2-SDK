@@ -50,6 +50,7 @@ class SerialComm(QObject):
         self.commands.put(data)
 
     def __ser_send(self, ser, data, monitor=True):
+        ser.flushInput()
         ser.write(bytes(data, 'utf8'))
         self.current_line_feedback.emit(data.strip())
         LOGGER.info(">>> " + data.strip())
@@ -123,6 +124,7 @@ class SerialComm(QObject):
                     # read bare command
                     if not self.commands.empty():
                         f = self.commands.get()
+
                         self.__ser_send(ser, f)
                         # TODO: check command and adjust timeout accordingly
                         ser.timeout = 10
@@ -132,10 +134,36 @@ class SerialComm(QObject):
                         # this part waits for command to be completed
                         LOGGER.debug("wait buffer")
                         while(True):
+
+                            '''
                             ser.timeout = 0.1
                             cmd = "?"
                             self.__ser_send(ser, cmd, monitor=False)
                             r1 = self.__ser_read(ser, monitor=False)
+                            '''
+
+                            retry_cnt = 0
+                            ret = ""
+                            cmd = "?"
+                            backup_timeout = ser.timeout
+                            ser.timeout = 0.01
+                            r1 = ""
+
+                            while True:
+                                self.__ser_send(ser, cmd, monitor=False)
+                                status = self.__ser_read(ser, monitor=False)
+                                if len(status) > 10:
+                                    if (status[0] == "<") and (status[-1] == ">"):
+                                        r1 = status
+                                        #print(r1)
+                                        break
+
+                                if retry_cnt > 0:
+                                    LOGGER.info("* Retry count:"+str(retry_cnt))
+
+                                retry_cnt += 1
+
+                            ser.timeout = backup_timeout
 
                             try:
                                 if r1[0] == "<":
@@ -153,9 +181,37 @@ class SerialComm(QObject):
                                         if buffers >= 35:
                                             if status == "Idle":
                                                 break
-                            except:
-                                pass
-                        LOGGER.debug("ok")
+                            except Exception as e:
+                                print("Parse error", e)
+
+                        #LOGGER.debug("ok")
+
+
+                        '''
+                        retry_cnt = 0
+                        ret = ""
+                        cmd = "?"
+                        backup_timeout = ser.timeout
+                        ser.timeout = 0.5
+
+                        while True:
+                            self.__ser_send(ser, cmd, monitor=False)
+                            status = self.__ser_read(ser, monitor=False)
+                            if len(status) > 10:
+                                if (status[0] == "<") and (status[-1] == ">"):
+                                    ret = status
+                                    self.serFeedback.emit(ret)
+                                    break
+
+                            if retry_cnt > 0:
+                                LOGGER.info("* Retry count", retry_cnt)
+                                print("* Retry count", retry_cnt)
+
+                            retry_cnt += 1
+
+                        ser.timeout = backup_timeout
+                        '''
+
 
                     # some commands require certain sequence and testing, these are put into recipes
                     # process these recipes only when main buffer is consumed
@@ -185,12 +241,66 @@ class SerialComm(QObject):
                             if rec == "status1":
                                 #self.action_recipe.put("status1")
                                 LOGGER.debug("status")
+                                retry_cnt = 0
+                                ret = ""
+                                cmd = "?"
+                                backup_timeout = ser.timeout
+                                ser.timeout = 0.5
+
+                                while True:
+                                    self.__ser_send(ser, cmd, monitor=False)
+                                    status = self.__ser_read(ser, monitor=False)
+                                    if len(status) > 10:
+                                        if (status[0] == "<") and (status[-1] == ">"):
+                                            ret = status
+                                            self.serFeedback.emit(ret)
+                                            break
+
+                                    if retry_cnt > 0:
+                                        LOGGER.info("Retry count " + str(retry_cnt))
+
+                                    retry_cnt += 1
+
+                                ser.timeout = backup_timeout
+
+
+
+                                '''
+                                LOGGER.debug("status")
                                 ser.timeout = 0.5
                                 cmd = "?"
                                 self.__ser_send(ser, cmd, monitor=False)
                                 r1 = self.__ser_read(ser, monitor=False)
                                 if len(r1) > 5:
                                     self.serFeedback.emit(r1)
+                                '''
+
+
+
+                                '''
+                                retry_cnt = 0
+                                ret = ""
+                                backup_timeout = ser.timeout
+                                ser.timeout = 0.02
+                                if echo:
+                                    print("")
+                                    print("> ?")
+
+                                while True:
+                                    status = send_command(ser, "?", echo=False)
+                                    if len(status) > 10:
+                                        if (status[0] == "<") and (status[-1] == ">"):
+                                            ret = status
+                                            if retry_cnt > 0:
+                                                if echo:
+                                                    print("* Retry count", retry_cnt)            
+                                            break
+                                        retry_cnt+1
+
+                                ser.timeout = backup_timeout
+                                return ret
+                                '''
+
 
                             if rec == "get_param_list":
                                 LOGGER.debug("get param list")

@@ -1,4 +1,4 @@
-boot_count: 141
+boot_count: 177
 clean_exit: true
 com_baud: 115200
 com_timeout: 5
@@ -8,8 +8,8 @@ lens:
     description: 18x 6.8-120mm 1/1.8"
     filter1:
       name: IR CUT
-      state_off: G90 G1 A1 F1
-      state_on: G90 G1 A0 F1
+      state_off: G90 G1 A0.7 F1
+      state_on: G90 G1 A0.3 F1
     iris:
       close: M114 P0
       open: M114 P1
@@ -44,9 +44,9 @@ lens:
 logging_level: DEBUG
 port: COM20
 preset:
-  p1: -9.37 -4.8 -2.7 --
-  p2: -7.3 -4.2 -1.8 --
-  p3: -- -- -- --
-  p4: -- -- -- --
-  p5: -- -- -- --
+  p1: -9.37 -4.8 -2.8 --
+  p2: -3.3 -3.9 -0.5 --
+  p3: 4.6 -1.4 3.8 --
+  p4: 8.6 0.6 4.9 --
+  p5: 11.6 3.5 2.7 --
 remember_last_com_port: true
