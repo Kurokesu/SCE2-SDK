@@ -1,4 +1,4 @@
-boot_count: 185
+boot_count: 186
 clean_exit: true
 com_baud: 115200
 com_timeout: 5
@@ -36,6 +36,12 @@ lens:
         axis_z: false
       speed_list: 2000 1500 *1000 500 200 100 50 10
       step_list: 0.01 0.05 *0.1 0.5 1.0 5.0
+    preset:
+      p1: -9.37 -4.8 -2.8 --
+      p2: -3.3 -3.9 -0.5 --
+      p3: 4.6 -1.4 3.8 --
+      p4: 8.6 0.6 4.9 --
+      p5: 11.6 3.5 2.7 --
     specs:
       focal_length_max: 120
       focal_length_min: 6.8
@@ -43,10 +49,4 @@ lens:
       lpm: 250
 logging_level: DEBUG
 port: COM20
-preset:
-  p1: -9.37 -4.8 -2.8 --
-  p2: -3.3 -3.9 -0.5 --
-  p3: 4.6 -1.4 3.8 --
-  p4: 8.6 0.6 4.9 --
-  p5: 11.6 3.5 2.7 --
 remember_last_com_port: true

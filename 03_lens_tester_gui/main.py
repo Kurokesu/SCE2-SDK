@@ -203,7 +203,7 @@ class MyWindowClass(QtWidgets.QMainWindow, gui.Ui_MainWindow):
 
 
     def push_pr1_go_clicked(self):
-        preset = self.config["preset"]["p1"].split(" ")  
+        preset = self.config["lens"][self.lens_name]["preset"]["p1"].split(" ")  
         cmd =  "G90"
         if self.config["lens"][self.lens_name]["motor"]["function"]["axis_x"]:
             cmd += " X"
@@ -222,7 +222,7 @@ class MyWindowClass(QtWidgets.QMainWindow, gui.Ui_MainWindow):
         self.hw.send(cmd+"\n")
 
     def push_pr2_go_clicked(self):
-        preset = self.config["preset"]["p2"].split(" ")  
+        preset = self.config["lens"][self.lens_name]["preset"]["p2"].split(" ")  
         cmd =  "G90"
         if self.config["lens"][self.lens_name]["motor"]["function"]["axis_x"]:
             cmd += " X"
@@ -241,7 +241,7 @@ class MyWindowClass(QtWidgets.QMainWindow, gui.Ui_MainWindow):
         self.hw.send(cmd+"\n")
 
     def push_pr3_go_clicked(self):
-        preset = self.config["preset"]["p3"].split(" ")  
+        preset = self.config["lens"][self.lens_name]["preset"]["p3"].split(" ")  
         cmd =  "G90"
         if self.config["lens"][self.lens_name]["motor"]["function"]["axis_x"]:
             cmd += " X"
@@ -260,7 +260,7 @@ class MyWindowClass(QtWidgets.QMainWindow, gui.Ui_MainWindow):
         self.hw.send(cmd+"\n")
 
     def push_pr4_go_clicked(self):
-        preset = self.config["preset"]["p4"].split(" ")  
+        preset = self.config["lens"][self.lens_name]["preset"]["p4"].split(" ")  
         cmd =  "G90"
         if self.config["lens"][self.lens_name]["motor"]["function"]["axis_x"]:
             cmd += " X"
@@ -279,7 +279,7 @@ class MyWindowClass(QtWidgets.QMainWindow, gui.Ui_MainWindow):
         self.hw.send(cmd+"\n")
 
     def push_pr5_go_clicked(self):
-        preset = self.config["preset"]["p5"].split(" ")  
+        preset = self.config["lens"][self.lens_name]["preset"]["p5"].split(" ")  
         cmd =  "G90"
         if self.config["lens"][self.lens_name]["motor"]["function"]["axis_x"]:
             cmd += " X"
@@ -320,7 +320,7 @@ class MyWindowClass(QtWidgets.QMainWindow, gui.Ui_MainWindow):
         else:
             val_a = "--"
 
-        self.config["preset"]["p1"] = val_x+" "+val_y+" "+val_z+" "+val_a
+        self.config["lens"][self.lens_name]["preset"]["p1"] = val_x+" "+val_y+" "+val_z+" "+val_a
 
         self.label_pr1_x.setText(val_x)
         self.label_pr1_y.setText(val_y)
@@ -349,7 +349,7 @@ class MyWindowClass(QtWidgets.QMainWindow, gui.Ui_MainWindow):
         else:
             val_a = "--"
 
-        self.config["preset"]["p2"] = val_x+" "+val_y+" "+val_z+" "+val_a
+        self.config["lens"][self.lens_name]["preset"]["p2"] = val_x+" "+val_y+" "+val_z+" "+val_a
 
         self.label_pr2_x.setText(val_x)
         self.label_pr2_y.setText(val_y)
@@ -378,7 +378,7 @@ class MyWindowClass(QtWidgets.QMainWindow, gui.Ui_MainWindow):
         else:
             val_a = "--"
 
-        self.config["preset"]["p3"] = val_x+" "+val_y+" "+val_z+" "+val_a
+        self.config["lens"][self.lens_name]["preset"]["p3"] = val_x+" "+val_y+" "+val_z+" "+val_a
 
         self.label_pr3_x.setText(val_x)
         self.label_pr3_y.setText(val_y)
@@ -407,7 +407,7 @@ class MyWindowClass(QtWidgets.QMainWindow, gui.Ui_MainWindow):
         else:
             val_a = "--"
 
-        self.config["preset"]["p4"] = val_x+" "+val_y+" "+val_z+" "+val_a
+        self.config["lens"][self.lens_name]["preset"]["p4"] = val_x+" "+val_y+" "+val_z+" "+val_a
 
         self.label_pr4_x.setText(val_x)
         self.label_pr4_y.setText(val_y)
@@ -436,7 +436,7 @@ class MyWindowClass(QtWidgets.QMainWindow, gui.Ui_MainWindow):
         else:
             val_a = "--"
 
-        self.config["preset"]["p5"] = val_x+" "+val_y+" "+val_z+" "+val_a
+        self.config["lens"][self.lens_name]["preset"]["p5"] = val_x+" "+val_y+" "+val_z+" "+val_a
 
         self.label_pr5_x.setText(val_x)
         self.label_pr5_y.setText(val_y)
@@ -694,31 +694,31 @@ class MyWindowClass(QtWidgets.QMainWindow, gui.Ui_MainWindow):
                 self.group_p4.setEnabled(True)
                 self.group_p5.setEnabled(True)
 
-                preset = self.config["preset"]["p1"].split(" ")
+                preset = self.config["lens"][self.lens_name]["preset"]["p1"].split(" ")
                 self.label_pr1_x.setText(preset[0])
                 self.label_pr1_y.setText(preset[1])
                 self.label_pr1_z.setText(preset[2])
                 self.label_pr1_a.setText(preset[3])
 
-                preset = self.config["preset"]["p2"].split(" ")
+                preset = self.config["lens"][self.lens_name]["preset"]["p2"].split(" ")
                 self.label_pr2_x.setText(preset[0])
                 self.label_pr2_y.setText(preset[1])
                 self.label_pr2_z.setText(preset[2])
                 self.label_pr2_a.setText(preset[3])
 
-                preset = self.config["preset"]["p3"].split(" ")
+                preset = self.config["lens"][self.lens_name]["preset"]["p3"].split(" ")
                 self.label_pr3_x.setText(preset[0])
                 self.label_pr3_y.setText(preset[1])
                 self.label_pr3_z.setText(preset[2])
                 self.label_pr3_a.setText(preset[3])
 
-                preset = self.config["preset"]["p4"].split(" ")
+                preset = self.config["lens"][self.lens_name]["preset"]["p4"].split(" ")
                 self.label_pr4_x.setText(preset[0])
                 self.label_pr4_y.setText(preset[1])
                 self.label_pr4_z.setText(preset[2])
                 self.label_pr4_a.setText(preset[3])
 
-                preset = self.config["preset"]["p5"].split(" ")
+                preset = self.config["lens"][self.lens_name]["preset"]["p5"].split(" ")
                 self.label_pr5_x.setText(preset[0])
                 self.label_pr5_y.setText(preset[1])
                 self.label_pr5_z.setText(preset[2])
@@ -975,19 +975,19 @@ class MyWindowClass(QtWidgets.QMainWindow, gui.Ui_MainWindow):
 
         if self.s_status.text() == "Connected":
             p1 = self.label_pr1_x.text()+" "+self.label_pr1_y.text()+" "+self.label_pr1_z.text()+" "+self.label_pr1_a.text()
-            self.config["preset"]["p1"] = p1
+            self.config["lens"][self.lens_name]["preset"]["p1"] = p1
 
             p2 = self.label_pr2_x.text()+" "+self.label_pr2_y.text()+" "+self.label_pr2_z.text()+" "+self.label_pr2_a.text()
-            self.config["preset"]["p2"] = p2
+            self.config["lens"][self.lens_name]["preset"]["p2"] = p2
 
             p3 = self.label_pr3_x.text()+" "+self.label_pr3_y.text()+" "+self.label_pr3_z.text()+" "+self.label_pr3_a.text()
-            self.config["preset"]["p3"] = p3
+            self.config["lens"][self.lens_name]["preset"]["p3"] = p3
 
             p4 = self.label_pr4_x.text()+" "+self.label_pr4_y.text()+" "+self.label_pr4_z.text()+" "+self.label_pr4_a.text()
-            self.config["preset"]["p4"] = p4
+            self.config["lens"][self.lens_name]["preset"]["p4"] = p4
 
             p5 = self.label_pr5_x.text()+" "+self.label_pr5_y.text()+" "+self.label_pr5_z.text()+" "+self.label_pr5_a.text()
-            self.config["preset"]["p5"] = p5
+            self.config["lens"][self.lens_name]["preset"]["p5"] = p5
 
         utils.exit_routine(SETTINGS_FILE, self.config)
         running = False
