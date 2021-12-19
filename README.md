@@ -25,7 +25,7 @@ Lens tester - GUI demo application
 * Download and install https://www.python.org/downloads/windows/ (tested with Python 3.10 on Win10 and Python 3.8.10 on Win7)
   * Check `Add Python 3.8 to PATH` in the first setup window!
   * Restart computer
-* Clone (or download archive) github repository: https://github.com/Kurokesu/SCE2-SDK in preferred directory
+* Clone (or download zip archive) from github repository: https://github.com/Kurokesu/SCE2-SDK in preferred directory
 * Open console at `03_lens_tester_gui` folder
 * Install dependences:
 ```
