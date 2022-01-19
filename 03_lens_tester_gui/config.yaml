@@ -1,4 +1,4 @@
-boot_count: 212
+boot_count: 213
 clean_exit: true
 com_baud: 115200
 com_timeout: 5
@@ -37,11 +37,11 @@ lens:
       speed_list: 2000 1500 *1000 500 200 100 50 10
       step_list: 0.01 0.05 *0.1 0.5 1.0 5.0
     preset:
-      p1: -9.37 -4.8 -2.8 --
-      p2: -3.3 -3.9 -0.5 --
-      p3: 4.6 -1.4 3.8 --
-      p4: 8.6 0.6 4.9 --
-      p5: 11.6 3.5 2.7 --
+      p1: -9.0 0.3 -- --
+      p2: -2.0 -1.9 -- --
+      p3: 1.0 -3.0 -- --
+      p4: 4.0 -3.8 -- --
+      p5: 9.5 -1.3 -- --
     specs:
       focal_length_max: 130
       focal_length_min: 5.3
