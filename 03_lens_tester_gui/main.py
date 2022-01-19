@@ -524,23 +524,46 @@ class MyWindowClass(QtWidgets.QMainWindow, gui.Ui_MainWindow):
 
 
 
-
-
     def btn_f1_on_clicked(self):
         cmd = self.config["lens"][self.lens_name]["filter1"]["state_on"]
-        self.hw.send(cmd+"\n")
+
+        if type(cmd) == str:
+            self.hw.send(cmd+"\n")
+
+        if type(cmd) == list:
+            for c in cmd:
+                self.hw.send(c+"\n")
 
     def btn_f1_off_clicked(self):
         cmd = self.config["lens"][self.lens_name]["filter1"]["state_off"]
-        self.hw.send(cmd+"\n")
+
+        if type(cmd) == str:
+            self.hw.send(cmd+"\n")
+
+        if type(cmd) == list:
+            for c in cmd:
+                self.hw.send(c+"\n")
 
     def btn_f2_on_clicked(self):
         cmd = self.config["lens"][self.lens_name]["filter2"]["state_on"]
-        self.hw.send(cmd+"\n")
+
+        if type(cmd) == str:
+            self.hw.send(cmd+"\n")
+
+        if type(cmd) == list:
+            for c in cmd:
+                self.hw.send(c+"\n")
 
     def btn_f2_off_clicked(self):
         cmd = self.config["lens"][self.lens_name]["filter2"]["state_off"]
-        self.hw.send(cmd+"\n")
+
+        if type(cmd) == str:
+            self.hw.send(cmd+"\n")
+
+        if type(cmd) == list:
+            for c in cmd:
+                self.hw.send(c+"\n")
+
 
     def btn_pi_led_on_clicked(self):
         cmd = self.config["lens"][self.lens_name]["limit_sensor"]["led_on"]
@@ -553,10 +576,12 @@ class MyWindowClass(QtWidgets.QMainWindow, gui.Ui_MainWindow):
     def btn_iris_on_clicked(self):
         cmd = self.config["lens"][self.lens_name]["iris"]["open"]
         self.hw.send(cmd+"\n")
+       
 
     def btn_iris_off_clicked(self):
         cmd = self.config["lens"][self.lens_name]["iris"]["close"]
         self.hw.send(cmd+"\n")
+
         
 
 
@@ -646,6 +671,13 @@ class MyWindowClass(QtWidgets.QMainWindow, gui.Ui_MainWindow):
                 self.lens_name = "L086"
                 self.label_lens_name.setText(self.lens_name)
                 lens_detected = True
+
+            if i[0:3] == "JWF":
+                self.lens_name = "L084"
+                self.label_lens_name.setText(self.lens_name)
+                lens_detected = True
+
+
 
 
             if lens_detected:

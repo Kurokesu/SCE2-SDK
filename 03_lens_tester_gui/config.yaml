@@ -1,9 +1,76 @@
-boot_count: 213
+boot_count: 239
 clean_exit: true
 com_baud: 115200
 com_timeout: 5
 controller_feedback_interval: 50
 lens:
+  L084:
+    description: 40x 6.3-252mm 1/1.8"
+    filter1:
+      name: IR CUT
+      state_off:
+      - M113 P1
+      - M116 P1
+      - M117 P0
+      - G04 P1
+      - M113 P0
+      state_on:
+      - M113 P1
+      - M116 P0
+      - M117 P1
+      - G04 P1
+      - M113 P0
+    filter2:
+      name: NIR
+      state_off:
+      - M113 P1
+      - M114 P1
+      - M115 P0
+      - G04 P1
+      - M113 P0
+      state_on:
+      - M113 P1
+      - M114 P0
+      - M115 P1
+      - G04 P1
+      - M113 P0
+    iris:
+      close: G90 G1 A-5 F1000
+      open: G90 G1 A0 F1000
+    lens_sku: L084-MZFD-6.3Z252-DIRECT
+    limit_sensor:
+      led_off: M120 P0
+      led_on: M120 P1
+    motor:
+      default_speed: 1000
+      function:
+        axis_a: Iris
+        axis_x: Zoom1
+        axis_y: Focus
+        axis_z: Zoom2
+      range:
+        axis_a: null
+        axis_x: null
+        axis_y: null
+        axis_z: null
+      reverse:
+        axis_a: false
+        axis_x: false
+        axis_y: false
+        axis_z: false
+      speed_list: 2000 1500 *1000 500 200 100 50 10
+      step_list: 0.01 0.05 *0.1 0.5 1.0 5.0
+    preset:
+      p1: 27.5 1.05 -6.0 0.703
+      p2: 7.5 -0.12 -3.0 0.0
+      p3: -2.5 0.0 3.0 0.0
+      p4: -8.7 -4.7 5.2 0.0
+      p5: -12.1 -8.4 5.2 0.0
+    specs:
+      focal_length_max: 252
+      focal_length_min: 6.3
+      image_circle: 9.2
+      lpm: 250
   L085:
     description: 25x 5.3-130mm 1/2.7"
     filter1:
@@ -91,5 +158,5 @@ lens:
       image_circle: 9.2
       lpm: 250
 logging_level: DEBUG
-port: COM56
+port: COM58
 remember_last_com_port: true
