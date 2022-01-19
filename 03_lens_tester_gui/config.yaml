@@ -1,4 +1,4 @@
-boot_count: 186
+boot_count: 200
 clean_exit: true
 com_baud: 115200
 com_timeout: 5
@@ -48,5 +48,5 @@ lens:
       image_circle: 9.2
       lpm: 250
 logging_level: DEBUG
-port: COM20
+port: COM57
 remember_last_com_port: true
