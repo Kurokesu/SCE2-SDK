@@ -1,9 +1,52 @@
-boot_count: 200
+boot_count: 212
 clean_exit: true
 com_baud: 115200
 com_timeout: 5
 controller_feedback_interval: 50
 lens:
+  L085:
+    description: 25x 5.3-130mm 1/2.7"
+    filter1:
+      name: IR CUT
+      state_off: G90 G1 A0.7 F1
+      state_on: G90 G1 A0.3 F1
+    iris:
+      close: M114 P0
+      open: M114 P1
+    lens_sku: L085-MZFD-5.3Z130-DIRECT
+    limit_sensor:
+      led_off: M120 P0
+      led_on: M120 P1
+    motor:
+      default_speed: 1000
+      function:
+        axis_a: null
+        axis_x: Zoom
+        axis_y: Focus
+        axis_z: null
+      range:
+        axis_a: null
+        axis_x: null
+        axis_y: null
+        axis_z: null
+      reverse:
+        axis_a: false
+        axis_x: false
+        axis_y: false
+        axis_z: false
+      speed_list: 2000 1500 *1000 500 200 100 50 10
+      step_list: 0.01 0.05 *0.1 0.5 1.0 5.0
+    preset:
+      p1: -9.37 -4.8 -2.8 --
+      p2: -3.3 -3.9 -0.5 --
+      p3: 4.6 -1.4 3.8 --
+      p4: 8.6 0.6 4.9 --
+      p5: 11.6 3.5 2.7 --
+    specs:
+      focal_length_max: 130
+      focal_length_min: 5.3
+      image_circle: 6.8
+      lpm: 250
   L086:
     description: 18x 6.8-120mm 1/1.8"
     filter1:
@@ -48,5 +91,5 @@ lens:
       image_circle: 9.2
       lpm: 250
 logging_level: DEBUG
-port: COM57
+port: COM56
 remember_last_com_port: true

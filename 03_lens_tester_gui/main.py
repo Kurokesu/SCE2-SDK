@@ -635,11 +635,20 @@ class MyWindowClass(QtWidgets.QMainWindow, gui.Ui_MainWindow):
         id_strings = txt_list[2].split(',')
 
         for i in id_strings:
-            if i[0:3] == "6ZG":
-                self.lens_name = "L086"                
-                self.label_lens_name.setText(self.lens_name)
-                #print(self.config["lens"]["L086"])
 
+            lens_detected = False
+            if i[0:3] == "LS8":
+                self.lens_name = "L085"
+                self.label_lens_name.setText(self.lens_name)
+                lens_detected = True
+
+            if i[0:3] == "6ZG":
+                self.lens_name = "L086"
+                self.label_lens_name.setText(self.lens_name)
+                lens_detected = True
+
+
+            if lens_detected:
                 cmd = self.config["lens"][self.lens_name]["limit_sensor"]["led_on"]
                 self.hw.send(cmd+"\n")
                 cmd = self.config["lens"][self.lens_name]["iris"]["open"]
