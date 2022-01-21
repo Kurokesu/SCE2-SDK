@@ -27,7 +27,7 @@ Lens tester - GUI demo application
   * Restart computer
 * Clone (or download zip archive) from github repository: https://github.com/Kurokesu/SCE2-SDK in preferred directory
 * Open console at `03_lens_tester_gui` folder
-* Install dependences:
+* Install dependencies:
 ```
 pip install -r requirements.txt
 ```
