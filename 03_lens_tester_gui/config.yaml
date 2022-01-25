@@ -1,4 +1,4 @@
-boot_count: 242
+boot_count: 245
 clean_exit: true
 com_baud: 115200
 com_timeout: 5
@@ -61,11 +61,11 @@ lens:
       speed_list: 2000 1500 *1000 500 200 100 50 10
       step_list: 0.01 0.05 *0.1 0.5 1.0 5.0
     preset:
-      p1: 35.0 3.31 -4.8 0.0
-      p2: 19.3 6.11 0.2 0.0
-      p3: -2.5 1.8 6.2 0.0
-      p4: -8.7 -3.5 3.6 0.0
-      p5: -16.7 -7.7 -2.5 0.0
+      p1: 35.0 2.93 -5.14 0.0
+      p2: 19.3 6.31 0.37 0.0
+      p3: -2.5 1.86 6.33 0.0
+      p4: -8.7 -3.49 3.74 0.0
+      p5: -16.7 -7.69 -2.48 0.0
     specs:
       focal_length_max: 252
       focal_length_min: 6.3
@@ -158,5 +158,5 @@ lens:
       image_circle: 9.2
       lpm: 250
 logging_level: DEBUG
-port: COM58
+port: COM59
 remember_last_com_port: true

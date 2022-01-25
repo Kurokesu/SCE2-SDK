@@ -798,6 +798,11 @@ class MyWindowClass(QtWidgets.QMainWindow, gui.Ui_MainWindow):
                 s.block_buffer_avail = int(temp1.split(",")[0])
                 s.rx_buffer_avail = int(temp1.split(",")[1])
 
+            s.limit_x = False
+            s.limit_y = False
+            s.limit_z = False
+            s.limit_a = False
+
             if p[0:2] == "Pn":
                 temp1 = p.split(":")[1]
                 s.limit_x = "X" in temp1
