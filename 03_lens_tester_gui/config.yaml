@@ -1,5 +1,5 @@
-boot_count: 256
-clean_exit: false
+boot_count: 274
+clean_exit: true
 com_baud: 115200
 com_timeout: 5
 controller_feedback_interval: 50
@@ -10,28 +10,28 @@ lens:
       name: IR CUT
       state_off:
       - M113 P1
-      - M116 P1
-      - M117 P0
+      - M116 P0
+      - M117 P1
       - G04 P1
       - M113 P0
       state_on:
       - M113 P1
-      - M116 P0
-      - M117 P1
+      - M116 P1
+      - M117 P0
       - G04 P1
       - M113 P0
     filter2:
       name: NIR
       state_off:
       - M113 P1
-      - M114 P1
-      - M115 P0
+      - M114 P0
+      - M115 P1
       - G04 P1
       - M113 P0
       state_on:
       - M113 P1
-      - M114 P0
-      - M115 P1
+      - M114 P1
+      - M115 P0
       - G04 P1
       - M113 P0
     iris:
@@ -158,5 +158,5 @@ lens:
       image_circle: 9.2
       lpm: 250
 logging_level: DEBUG
-port: COM61
+port: COM147
 remember_last_com_port: true

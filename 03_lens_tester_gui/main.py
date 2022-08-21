@@ -826,7 +826,12 @@ class MyWindowClass(QtWidgets.QMainWindow, gui.Ui_MainWindow):
         self.label_a_pos.setText(str(round(s.pos_a,3)))
 
         
+        self.btn_x_seek.setEnabled(True)
+        self.btn_y_seek.setEnabled(True)
+        self.btn_z_seek.setEnabled(True)
+        self.btn_a_seek.setEnabled(True)
 
+        '''
         if s.limit_x:
             self.label_x_pi.setText('LOW')
             self.label_x_pi.setStyleSheet("color: " + COLOR_RED)
@@ -862,6 +867,7 @@ class MyWindowClass(QtWidgets.QMainWindow, gui.Ui_MainWindow):
             self.label_a_pi.setText('HIGH')
             self.label_a_pi.setStyleSheet("")
             self.btn_a_seek.setEnabled(True)
+        '''
 
 
         self.label_buffer_count.setText(str(s.block_buffer_avail))
