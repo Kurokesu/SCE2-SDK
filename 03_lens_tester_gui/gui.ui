@@ -511,16 +511,6 @@
           </item>
          </layout>
         </item>
-        <item>
-         <widget class="QLabel" name="label">
-          <property name="text">
-           <string>Seek ref will only work when limit swith is reading HIGH</string>
-          </property>
-          <property name="alignment">
-           <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-          </property>
-         </widget>
-        </item>
        </layout>
       </item>
       <item>
@@ -1641,7 +1631,7 @@
             <string/>
            </property>
            <property name="icon">
-            <iconset resource="../../../LP0678-motion_family/02_design/SRC_rotary_table_control_software/assets/images.qrc">
+            <iconset resource="images.qrc">
              <normaloff>:/logo/restart.png</normaloff>:/logo/restart.png</iconset>
            </property>
           </widget>
@@ -1778,7 +1768,7 @@
   <widget class="QStatusBar" name="statusbar"/>
  </widget>
  <resources>
-  <include location="../../../LP0678-motion_family/02_design/SRC_rotary_table_control_software/assets/images.qrc"/>
+  <include location="images.qrc"/>
  </resources>
  <connections/>
 </ui>
