@@ -840,12 +840,12 @@ class MyWindowClass(QtWidgets.QMainWindow, gui.Ui_MainWindow):
                 # TODO: add legend
                 
                 # FIXME: for now assume all axes has same pull-off distance
-                #pull_off = self.config["lens"][self.lens_name]["motor"]["homing_pulloff"]["value"]                
+                #pull_off = self.config["lens"][self.lens_name]["motor"]["homing_pulloff"]["value"]
                 pull_off = -0.5
-                interpolate_count = 40
+                interpolate_count = 40 # TBD: move to config
                 try:
                     data_x = self.config["lens"][self.lens_name]["motor"]["curves"]["focus_inf"]["x"]
-                    data_y = self.config["lens"][self.lens_name]["motor"]["curves"]["focus_inf"]["y"]                    
+                    data_y = self.config["lens"][self.lens_name]["motor"]["curves"]["focus_inf"]["y"]
                     data_x = [i-pull_off for i in data_x]
                     data_y = [i-pull_off for i in data_y]
                     (data_x, data_y) = approximate_spline(data_x, data_y, interpolate_count)
@@ -855,7 +855,7 @@ class MyWindowClass(QtWidgets.QMainWindow, gui.Ui_MainWindow):
 
                 try:
                     data_x = self.config["lens"][self.lens_name]["motor"]["curves"]["zoom_correction"]["x"]
-                    data_y = self.config["lens"][self.lens_name]["motor"]["curves"]["zoom_correction"]["y"]                    
+                    data_y = self.config["lens"][self.lens_name]["motor"]["curves"]["zoom_correction"]["y"]
                     data_x = [i-pull_off for i in data_x]
                     data_y = [i-pull_off for i in data_y]
                     (data_x, data_y) = approximate_spline(data_x, data_y, interpolate_count)
@@ -865,7 +865,7 @@ class MyWindowClass(QtWidgets.QMainWindow, gui.Ui_MainWindow):
 
                 try:
                     data_x = self.config["lens"][self.lens_name]["motor"]["curves"]["focus_near"]["x"]
-                    data_y = self.config["lens"][self.lens_name]["motor"]["curves"]["focus_near"]["y"]                    
+                    data_y = self.config["lens"][self.lens_name]["motor"]["curves"]["focus_near"]["y"]
                     data_x = [i-pull_off for i in data_x]
                     data_y = [i-pull_off for i in data_y]
                     (data_x, data_y) = approximate_spline(data_x, data_y, interpolate_count)
@@ -875,7 +875,7 @@ class MyWindowClass(QtWidgets.QMainWindow, gui.Ui_MainWindow):
 
                 try:
                     data_x = self.config["lens"][self.lens_name]["motor"]["curves"]["focus_ir"]["x"]
-                    data_y = self.config["lens"][self.lens_name]["motor"]["curves"]["focus_ir"]["y"]                    
+                    data_y = self.config["lens"][self.lens_name]["motor"]["curves"]["focus_ir"]["y"]
                     data_x = [i-pull_off for i in data_x]
                     data_y = [i-pull_off for i in data_y]
                     (data_x, data_y) = approximate_spline(data_x, data_y, interpolate_count)
