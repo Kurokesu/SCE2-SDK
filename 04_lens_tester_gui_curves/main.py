@@ -815,8 +815,7 @@ class MyWindowClass(QtWidgets.QMainWindow, gui.Ui_MainWindow):
                 # TODO: add legend
                 
                 # FIXME: for now assume all axes has same pull-off distance
-                #pull_off = self.config["lens"][self.lens_name]["motor"]["homing_pulloff"]["value"]
-                
+                #pull_off = self.config["lens"][self.lens_name]["motor"]["homing_pulloff"]["value"]                
                 pull_off = -0.5
                 try:
                     data_x = self.config["lens"][self.lens_name]["motor"]["curves"]["focus_inf"]["x"]
