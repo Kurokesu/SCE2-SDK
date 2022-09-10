@@ -802,7 +802,7 @@ class MyWindowClass(QtWidgets.QMainWindow, gui.Ui_MainWindow):
                 self.plot_focus_inf = self.plot.plot(pen='blue')
                 self.plot_focus_near = self.plot.plot(pen='teal')
                 self.plot_focus_ir = self.plot.plot(pen='red')
-                self.plot_correction = self.plot.plot(pen='green')
+                self.plot_correction = self.plot.plot(pen='gray')
                 
                 # self.curve = plot.plot(pen=pg.mkPen('r', width=2)) # slow
                 #self.phigh = self.plot.plot(pen=(50, 200, 50, 100))
@@ -820,8 +820,8 @@ class MyWindowClass(QtWidgets.QMainWindow, gui.Ui_MainWindow):
                 try:
                     data_x = self.config["lens"][self.lens_name]["motor"]["curves"]["focus_inf"]["x"]
                     data_y = self.config["lens"][self.lens_name]["motor"]["curves"]["focus_inf"]["y"]                    
-                    data_x = [x-pull_off for x in data_x]
-                    data_y = [x-pull_off for x in data_y]
+                    data_x = [-1*i-0.5 for i in data_x]
+                    data_y = [-1*i-0 for i in data_y]
                     self.plot_focus_inf.setData(x=data_x, y=data_y)
                 except:
                     LOGGER.error('focus_inf not found')
@@ -829,8 +829,8 @@ class MyWindowClass(QtWidgets.QMainWindow, gui.Ui_MainWindow):
                 try:
                     data_x = self.config["lens"][self.lens_name]["motor"]["curves"]["zoom_correction"]["x"]
                     data_y = self.config["lens"][self.lens_name]["motor"]["curves"]["zoom_correction"]["y"]                    
-                    data_x = [x-pull_off for x in data_x]
-                    data_y = [x-pull_off for x in data_y]
+                    data_x = [-1*i-pull_off for i in data_x]
+                    data_y = [-1*i-pull_off for i in data_y]
                     self.plot_correction.setData(x=data_x, y=data_y)
                 except:
                     LOGGER.error('zoom_correction not found')
@@ -838,8 +838,8 @@ class MyWindowClass(QtWidgets.QMainWindow, gui.Ui_MainWindow):
                 try:
                     data_x = self.config["lens"][self.lens_name]["motor"]["curves"]["focus_near"]["x"]
                     data_y = self.config["lens"][self.lens_name]["motor"]["curves"]["focus_near"]["y"]                    
-                    data_x = [x-pull_off for x in data_x]
-                    data_y = [x-pull_off for x in data_y]
+                    data_x = [-1*i-pull_off for i in data_x]
+                    data_y = [-1*i-pull_off for i in data_y]
                     self.plot_focus_near.setData(x=data_x, y=data_y)
                 except:
                     LOGGER.error('focus_near not found')
@@ -847,8 +847,8 @@ class MyWindowClass(QtWidgets.QMainWindow, gui.Ui_MainWindow):
                 try:
                     data_x = self.config["lens"][self.lens_name]["motor"]["curves"]["focus_ir"]["x"]
                     data_y = self.config["lens"][self.lens_name]["motor"]["curves"]["focus_ir"]["y"]                    
-                    data_x = [x-pull_off for x in data_x]
-                    data_y = [x-pull_off for x in data_y]
+                    data_x = [-1*i-pull_off for i in data_x]
+                    data_y = [-1*i-pull_off for i in data_y]
                     self.plot_focus_ir.setData(x=data_x, y=data_y)
                 except:
                     LOGGER.error('focus_ir not found')
@@ -856,7 +856,7 @@ class MyWindowClass(QtWidgets.QMainWindow, gui.Ui_MainWindow):
 
                 # scater data
                 self.scatter_focus_zoom = self.plot.plot(pen=None, symbol='x', symbolPen="blue")
-                self.scatter_compensate = self.plot.plot(pen=None, symbol='x', symbolPen="green")
+                self.scatter_compensate = self.plot.plot(pen=None, symbol='x', symbolPen="gray")
                 #x_data = [0]
                 #y_data = [0]
                 #self.scatter_focus_zoom.setData([0], y_data)
@@ -903,8 +903,8 @@ class MyWindowClass(QtWidgets.QMainWindow, gui.Ui_MainWindow):
 
         # setting data to the scatter plot
         if self.lens_name:
-            self.scatter_focus_zoom.setData([s.pos_x], [s.pos_y])
-            self.scatter_compensate.setData([s.pos_x], [s.pos_z])
+            self.scatter_focus_zoom.setData([s.pos_x], [s.pos_z])
+            self.scatter_compensate.setData([s.pos_x], [s.pos_y])
 
         self.label_x_pos.setText(str(round(s.pos_x,3)))
         self.label_y_pos.setText(str(round(s.pos_y,3)))
