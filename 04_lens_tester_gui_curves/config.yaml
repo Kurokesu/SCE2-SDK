@@ -1,4 +1,4 @@
-boot_count: 331
+boot_count: 341
 clean_exit: true
 com_baud: 115200
 com_timeout: 5
@@ -48,11 +48,6 @@ lens:
         axis_x: Zoom1
         axis_y: Focus
         axis_z: Zoom2
-      homing_pull_off:
-        axis_a: 0.5
-        axis_x: 0.5
-        axis_y: 0.5
-        axis_z: 0.5
       range:
         axis_a: null
         axis_x: null
@@ -139,6 +134,11 @@ lens:
         axis_x: Zoom1
         axis_y: Zoom2
         axis_z: Focus
+      homing_pulloff:
+        axis_a: 0.5
+        axis_x: 0.5
+        axis_y: 0.5
+        axis_z: 0.5
       range:
         axis_a: null
         axis_x: null

@@ -84,6 +84,7 @@ class MyWindowClass(QtWidgets.QMainWindow, gui.Ui_MainWindow):
 
         # wwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwww
 
+        '''
         #self.plot = self.win.addPlot(axisItems={'bottom': TimeAxisItem(orientation='bottom')})
         self.plot = self.win.addPlot()
         self.plot.showGrid(True, True, 0.2)
@@ -101,7 +102,6 @@ class MyWindowClass(QtWidgets.QMainWindow, gui.Ui_MainWindow):
         #pfill = pg.FillBetweenItem(self.phigh, self.plow, brush=(100, 255, 100, 100))
         #self.plot.addItem(pfill)
         
-        
         # TODO: move to config file, plot once loaded
         # TODO: clean after fresh load
         # TODO: add legend
@@ -113,7 +113,7 @@ class MyWindowClass(QtWidgets.QMainWindow, gui.Ui_MainWindow):
         self.plot_focus_inf.setData(x=zoom_inf, y=focus_inf)
 
         zoom_correction = [-23.18, -21.98, -20.8, -19.6, -18.41, -17.22, -16.02, -14.83, -13.63, -12.45, -11.25, -10.06, -8.871, -7.675, -6.479, -5.294, -4.098, -2.902, -1.717, -0.5213, 0.6746, 1.87, 3.056, 4.252, 5.447, 6.633, 7.828, 9.024, 10.21, 11.41, 12.6, 13.8, 14.98, 16.18, 17.37, 18.56, 19.76, 20.95, 22.14, 23.33, 24.53, 25.71, 26.91, 28.1, 29.3, 30.49, 31.68, 32.88, 34.06, 35.26]
-        correction = [-1.71, -0.84, -0.216, 0.323, 0.724, 1.14, 1.54, 1.89, 2.26, 2.62, 3.02, 3.42, 3.82, 4.19, 4.54, 4.91, 5.16, 5.37, 5.51, 5.58, 5.59, 5.53, 5.42, 5.26, 5.02, 4.73, 4.38, 4.03, 3.65, 3.21, 2.76, 2.31, 1.81, 1.33, 0.83, 0.333, -0.153, -0.639, -1.09, -1.54, -1.97, -2.39, -2.81, -3.22, -3.64, -4.08, -4.5, -5, -5.5, -6.01]        
+        correction = [-1.71, -0.84, -0.216, 0.323, 0.724, 1.14, 1.54, 1.89, 2.26, 2.62, 3.02, 3.42, 3.82, 4.19, 4.54, 4.91, 5.16, 5.37, 5.51, 5.58, 5.59, 5.53, 5.42, 5.26, 5.02, 4.73, 4.38, 4.03, 3.65, 3.21, 2.76, 2.31, 1.81, 1.33, 0.83, 0.333, -0.153, -0.639, -1.09, -1.54, -1.97, -2.39, -2.81, -3.22, -3.64, -4.08, -4.5, -5, -5.5, -6.01]
         zoom_correction = [x-pull_off for x in zoom_correction]
         correction = [x-pull_off for x in correction]
         self.plot_correction.setData(x=zoom_correction, y=correction)
@@ -131,8 +131,6 @@ class MyWindowClass(QtWidgets.QMainWindow, gui.Ui_MainWindow):
         self.plot_focus_ir.setData(x=zoom_ir, y=focus_ir)
 
 
-
-
         # scater data
         self.scatter_focus_zoom = self.plot.plot(pen=None, symbol='x', symbolPen="blue")
         self.scatter_compensate = self.plot.plot(pen=None, symbol='x', symbolPen="green")
@@ -141,8 +139,7 @@ class MyWindowClass(QtWidgets.QMainWindow, gui.Ui_MainWindow):
         #self.scatter_focus_zoom.setData([0], y_data)
         #self.scatter_compensate.setData(x_data, y_data)
 
-        # wwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwww
-
+        '''
 
 
 
@@ -863,6 +860,67 @@ class MyWindowClass(QtWidgets.QMainWindow, gui.Ui_MainWindow):
                     self.group_a_axis.setTitle("A axis / " + self.config["lens"][self.lens_name]["motor"]["function"]["axis_a"])
 
 
+
+
+                # ------------------
+
+                #self.plot = self.win.addPlot(axisItems={'bottom': TimeAxisItem(orientation='bottom')})
+                self.plot = self.win.addPlot()
+                self.plot.showGrid(True, True, 0.2)
+                self.plot.setMenuEnabled(enableMenu=False)
+                self.plot.hideButtons()
+                self.plot.setMouseEnabled(x=False, y=False)
+                self.plot_focus_inf = self.plot.plot(pen='blue')
+                self.plot_focus_near = self.plot.plot(pen='teal')
+                self.plot_focus_ir = self.plot.plot(pen='red')
+                self.plot_correction = self.plot.plot(pen='green')
+                
+                # self.curve = plot.plot(pen=pg.mkPen('r', width=2)) # slow
+                #self.phigh = self.plot.plot(pen=(50, 200, 50, 100))
+                #self.plow = self.plot.plot(pen=(50, 200, 50, 100))
+                #pfill = pg.FillBetweenItem(self.phigh, self.plow, brush=(100, 255, 100, 100))
+                #self.plot.addItem(pfill)
+                
+                # TODO: move to config file, plot once loaded
+                # TODO: clean after fresh load
+                # TODO: add legend
+                pull_off = 0.5
+                zoom_inf = [-23.2, -22, -20.81, -19.62, -18.43, -17.23, -16.04, -14.85, -13.65, -12.46, -11.26, -10.08, -8.882, -7.686, -6.49, -5.305, -4.109, -2.913, -1.717, -0.5319, 0.664, 1.86, 3.056, 4.241, 5.437, 6.633, 7.828, 9.014, 10.21, 11.41, 12.6, 13.79, 14.98, 16.18, 17.37, 18.56, 19.76, 20.95, 22.15, 23.33, 24.53, 25.72, 26.92, 28.1, 29.3, 30.5, 31.69, 32.88, 34.07, 35.27]
+                focus_inf = [6.41, 1.39, -0.626, -1.86, -2.6, -3.08, -3.32, -3.31, -3.14, -2.79, -2.27, -1.65, -0.859, -0.0256, 0.857, 1.73, 2.6, 3.45, 4.21, 4.92, 5.6, 6.18, 6.69, 7.16, 7.53, 7.85, 8.08, 8.23, 8.33, 8.38, 8.37, 8.31, 8.19, 8.05, 7.88, 7.69, 7.52, 7.3, 7.08, 6.86, 6.63, 6.42, 6.19, 5.96, 5.7, 5.45, 5.18, 4.85, 4.48, 4.08]
+                zoom_inf = [x-pull_off for x in zoom_inf]
+                focus_inf = [x-pull_off for x in focus_inf]
+                self.plot_focus_inf.setData(x=zoom_inf, y=focus_inf)
+
+                zoom_correction = [-23.18, -21.98, -20.8, -19.6, -18.41, -17.22, -16.02, -14.83, -13.63, -12.45, -11.25, -10.06, -8.871, -7.675, -6.479, -5.294, -4.098, -2.902, -1.717, -0.5213, 0.6746, 1.87, 3.056, 4.252, 5.447, 6.633, 7.828, 9.024, 10.21, 11.41, 12.6, 13.8, 14.98, 16.18, 17.37, 18.56, 19.76, 20.95, 22.14, 23.33, 24.53, 25.71, 26.91, 28.1, 29.3, 30.49, 31.68, 32.88, 34.06, 35.26]
+                correction = [-1.71, -0.84, -0.216, 0.323, 0.724, 1.14, 1.54, 1.89, 2.26, 2.62, 3.02, 3.42, 3.82, 4.19, 4.54, 4.91, 5.16, 5.37, 5.51, 5.58, 5.59, 5.53, 5.42, 5.26, 5.02, 4.73, 4.38, 4.03, 3.65, 3.21, 2.76, 2.31, 1.81, 1.33, 0.83, 0.333, -0.153, -0.639, -1.09, -1.54, -1.97, -2.39, -2.81, -3.22, -3.64, -4.08, -4.5, -5, -5.5, -6.01]
+                zoom_correction = [x-pull_off for x in zoom_correction]
+                correction = [x-pull_off for x in correction]
+                self.plot_correction.setData(x=zoom_correction, y=correction)
+
+                zoom_near = [-23.19, -21.99, -20.81, -19.61, -18.42, -17.23, -16.04, -14.84, -13.64, -12.46, -11.26, -10.07, -8.882, -7.686, -6.49, -5.305, -4.109, -2.913, -1.728, -0.5319, 0.664, 1.86, 3.045, 4.241, 5.437, 6.622, 7.818, 9.014, 10.2, 11.39, 12.59, 13.79, 14.97, 16.17, 17.36, 18.55, 19.74, 20.94, 22.13, 23.32, 24.52, 25.7, 26.9, 28.09, 29.29, 30.48, 31.67, 32.87, 34.05, 35.25]
+                focus_near = [-0.744, -3.51, -4.99, -5.89, -6.22, -6.23, -5.96, -5.56, -4.92, -4.23, -3.42, -2.53, -1.59, -0.629, 0.332, 1.25, 2.19, 3.09, 3.92, 4.67, 5.38, 6, 6.54, 7.03, 7.44, 7.77, 7.99, 8.18, 8.28, 8.33, 8.32, 8.27, 8.15, 8.01, 7.84, 7.67, 7.48, 7.27, 7.06, 6.84, 6.62, 6.4, 6.18, 5.95, 5.7, 5.43, 5.17, 4.86, 4.47, 4.06]
+                zoom_near = [x-pull_off for x in zoom_near]
+                focus_near = [x-pull_off for x in focus_near]
+                self.plot_focus_near.setData(x=zoom_near, y=focus_near)
+
+                zoom_ir = [-11.99, -11.03, -10.07, -9.104, -8.141, -7.167, -6.204, -5.241, -4.278, -3.315, -2.352, -1.389, -0.426, 0.537, 1.5, 2.474, 3.437, 4.4, 5.363, 6.326, 7.289, 8.252, 9.215, 10.18, 11.14, 12.11, 13.08, 14.04, 15, 15.97, 16.93, 17.89, 18.86, 19.82, 20.78, 21.76, 22.72, 23.68, 24.64, 25.61, 26.57, 27.53, 28.5, 29.46, 30.42, 31.4, 32.36, 33.32, 34.29, 35.25]
+                focus_ir = [-6.3, -5.26, -4.29, -3.32, -2.36, -1.42, -0.489, 0.442, 1.29, 2.12, 2.9, 3.62, 4.28, 4.92, 5.48, 5.98, 6.44, 6.84, 7.2, 7.51, 7.73, 7.93, 8.06, 8.16, 8.22, 8.22, 8.19, 8.13, 8.06, 7.99, 7.86, 7.71, 7.58, 7.42, 7.26, 7.11, 6.94, 6.76, 6.58, 6.39, 6.21, 6.03, 5.85, 5.65, 5.42, 5.2, 4.97, 4.71, 4.38, 4.04]
+                zoom_ir = [x-pull_off for x in zoom_ir]
+                focus_ir = [x-pull_off for x in focus_ir]
+                self.plot_focus_ir.setData(x=zoom_ir, y=focus_ir)
+
+
+                # scater data
+                self.scatter_focus_zoom = self.plot.plot(pen=None, symbol='x', symbolPen="blue")
+                self.scatter_compensate = self.plot.plot(pen=None, symbol='x', symbolPen="green")
+                #x_data = [0]
+                #y_data = [0]
+                #self.scatter_focus_zoom.setData([0], y_data)
+                #self.scatter_compensate.setData(x_data, y_data)
+
+
+
+
                 
 
     def serFeedback(self, text):
@@ -900,8 +958,9 @@ class MyWindowClass(QtWidgets.QMainWindow, gui.Ui_MainWindow):
 
 
         # setting data to the scatter plot
-        self.scatter_focus_zoom.setData([s.pos_x], [s.pos_y])
-        self.scatter_compensate.setData([s.pos_x], [s.pos_z])
+        if self.lens_name:
+            self.scatter_focus_zoom.setData([s.pos_x], [s.pos_y])
+            self.scatter_compensate.setData([s.pos_x], [s.pos_z])
 
         self.label_x_pos.setText(str(round(s.pos_x,3)))
         self.label_y_pos.setText(str(round(s.pos_y,3)))
@@ -1134,4 +1193,3 @@ app.setStyle('Fusion')
 myWindow = MyWindowClass(None)
 myWindow.show()
 app.exec_()
-
