@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>856</width>
+    <width>1096</width>
     <height>708</height>
    </rect>
   </property>
@@ -511,20 +511,33 @@
           </item>
          </layout>
         </item>
+        <item>
+         <widget class="QLabel" name="label">
+          <property name="text">
+           <string>Seek ref will only work when limit swith is reading HIGH</string>
+          </property>
+          <property name="alignment">
+           <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+          </property>
+         </widget>
+        </item>
        </layout>
       </item>
       <item>
-       <spacer name="horizontalSpacer">
-        <property name="orientation">
-         <enum>Qt::Horizontal</enum>
+       <widget class="GraphicsLayoutWidget" name="win">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Expanding" vsizetype="Preferred">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
         </property>
-        <property name="sizeHint" stdset="0">
+        <property name="maximumSize">
          <size>
-          <width>40</width>
-          <height>20</height>
+          <width>16777215</width>
+          <height>16777215</height>
          </size>
         </property>
-       </spacer>
+       </widget>
       </item>
       <item>
        <layout class="QVBoxLayout" name="verticalLayout_19">
@@ -1631,7 +1644,7 @@
             <string/>
            </property>
            <property name="icon">
-            <iconset resource="images.qrc">
+            <iconset>
              <normaloff>:/logo/restart.png</normaloff>:/logo/restart.png</iconset>
            </property>
           </widget>
@@ -1760,15 +1773,22 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>856</width>
+     <width>1096</width>
      <height>21</height>
     </rect>
    </property>
   </widget>
   <widget class="QStatusBar" name="statusbar"/>
  </widget>
+ <customwidgets>
+  <customwidget>
+   <class>GraphicsLayoutWidget</class>
+   <extends>QGraphicsView</extends>
+   <header>pyqtgraph</header>
+  </customwidget>
+ </customwidgets>
  <resources>
-  <include location="images.qrc"/>
+  <include location="../../../LP0678-motion_family/02_design/SRC_rotary_table_control_software/assets/images.qrc"/>
  </resources>
  <connections/>
 </ui>

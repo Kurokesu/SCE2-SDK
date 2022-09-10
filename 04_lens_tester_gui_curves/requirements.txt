@@ -2,3 +2,4 @@ pyyaml
 pyqt5
 numpy
 pyserial
+pyqtgraph

@@ -1,4 +1,4 @@
-boot_count: 285
+boot_count: 331
 clean_exit: true
 com_baud: 115200
 com_timeout: 5
@@ -10,28 +10,28 @@ lens:
       name: IR CUT
       state_off:
       - M113 P1
-      - M116 P0
-      - M117 P1
+      - M116 P1
+      - M117 P0
       - G04 P1
       - M113 P0
       state_on:
       - M113 P1
-      - M116 P1
-      - M117 P0
+      - M116 P0
+      - M117 P1
       - G04 P1
       - M113 P0
     filter2:
       name: NIR
       state_off:
       - M113 P1
-      - M114 P0
-      - M115 P1
+      - M114 P1
+      - M115 P0
       - G04 P1
       - M113 P0
       state_on:
       - M113 P1
-      - M114 P1
-      - M115 P0
+      - M114 P0
+      - M115 P1
       - G04 P1
       - M113 P0
     iris:
@@ -48,6 +48,11 @@ lens:
         axis_x: Zoom1
         axis_y: Focus
         axis_z: Zoom2
+      homing_pull_off:
+        axis_a: 0.5
+        axis_x: 0.5
+        axis_y: 0.5
+        axis_z: 0.5
       range:
         axis_a: null
         axis_x: null
@@ -61,11 +66,11 @@ lens:
       speed_list: 2000 1500 *1000 500 200 100 50 10
       step_list: 0.01 0.05 *0.1 0.5 1.0 5.0
     preset:
-      p1: 35.0 2.93 -5.14 0.0
-      p2: 19.3 6.31 0.37 0.0
-      p3: -2.5 1.86 6.33 0.0
-      p4: -8.7 -3.49 3.74 0.0
-      p5: -16.7 -7.69 -2.48 0.0
+      p1: 34.45 3.05 -6.4 0.0
+      p2: 12.5 7.55 2.19 0.0
+      p3: -0.4 4.0 5.08 0.0
+      p4: -14.26 -4.6 1.65 0.0
+      p5: -21.18 2.25 -0.73 0.0
     specs:
       focal_length_max: 252
       focal_length_min: 6.3
@@ -147,16 +152,16 @@ lens:
       speed_list: 2000 1500 *1000 500 200 100 50 10
       step_list: 0.01 0.05 *0.1 0.5 1.0 5.0
     preset:
-      p1: -9.37 -4.8 -2.8 --
-      p2: -3.3 -3.9 -0.5 --
-      p3: 4.6 -1.4 3.8 --
-      p4: 8.6 0.6 4.9 --
-      p5: 11.6 3.5 2.7 --
+      p1: -9.37 -4.8 -2.4 --
+      p2: -3.3 -3.9 -0.1 --
+      p3: 4.6 -1.4 4.2 --
+      p4: 8.6 0.6 5.3 --
+      p5: 11.6 3.5 2.8 --
     specs:
       focal_length_max: 120
       focal_length_min: 6.8
       image_circle: 9.2
       lpm: 250
 logging_level: DEBUG
-port: COM151
+port: COM149
 remember_last_com_port: true

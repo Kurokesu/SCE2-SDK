@@ -7,4 +7,6 @@ out
 *.bat
 *.spec
 *.log
+*.log.*
 *.bak
+*.lnk
