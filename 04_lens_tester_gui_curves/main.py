@@ -1,7 +1,7 @@
 ﻿import logs
 import version
-#import json
 import yaml
+import ezdxf
 import sys
 from pathlib import Path
 from PyQt5 import QtCore, QtGui, QtWidgets, uic, QtSvg
@@ -25,6 +25,31 @@ COLOR_GREEN = '#33cc33'
 COLOR_YELLOW = '#E5B500'
 COLOR_RED = '#C0150E'
 SETTINGS_FILE = 'config.yaml'
+
+
+
+def approximate_spline(data_x, data_y, point_count):
+    doc = ezdxf.new(dxfversion='R2010')
+
+    control_points = []
+    for i in range(len(data_x)):
+        control_points.append((data_x[i], data_y[i], 0))
+
+    msp = doc.modelspace()
+    spline = msp.add_open_spline(control_points)
+
+    bspline = spline.construction_tool()
+    xy_pts = [p.xy for p in bspline.approximate(segments=point_count)]
+    msp.add_polyline2d(xy_pts)
+
+    x_values = []
+    y_values = []
+    for i in xy_pts:
+        x_values.append(i[0])
+        y_values.append(i[1])
+
+    return((x_values, y_values))
+   
 
 
 class Status():
@@ -817,11 +842,13 @@ class MyWindowClass(QtWidgets.QMainWindow, gui.Ui_MainWindow):
                 # FIXME: for now assume all axes has same pull-off distance
                 #pull_off = self.config["lens"][self.lens_name]["motor"]["homing_pulloff"]["value"]                
                 pull_off = -0.5
+                interpolate_count = 40
                 try:
                     data_x = self.config["lens"][self.lens_name]["motor"]["curves"]["focus_inf"]["x"]
                     data_y = self.config["lens"][self.lens_name]["motor"]["curves"]["focus_inf"]["y"]                    
                     data_x = [i-pull_off for i in data_x]
                     data_y = [i-pull_off for i in data_y]
+                    (data_x, data_y) = approximate_spline(data_x, data_y, interpolate_count)
                     self.plot_focus_inf.setData(x=data_x, y=data_y)
                 except:
                     LOGGER.error('focus_inf not found')
@@ -831,6 +858,7 @@ class MyWindowClass(QtWidgets.QMainWindow, gui.Ui_MainWindow):
                     data_y = self.config["lens"][self.lens_name]["motor"]["curves"]["zoom_correction"]["y"]                    
                     data_x = [i-pull_off for i in data_x]
                     data_y = [i-pull_off for i in data_y]
+                    (data_x, data_y) = approximate_spline(data_x, data_y, interpolate_count)
                     self.plot_correction.setData(x=data_x, y=data_y)
                 except:
                     LOGGER.error('zoom_correction not found')
@@ -840,6 +868,7 @@ class MyWindowClass(QtWidgets.QMainWindow, gui.Ui_MainWindow):
                     data_y = self.config["lens"][self.lens_name]["motor"]["curves"]["focus_near"]["y"]                    
                     data_x = [i-pull_off for i in data_x]
                     data_y = [i-pull_off for i in data_y]
+                    (data_x, data_y) = approximate_spline(data_x, data_y, interpolate_count)
                     self.plot_focus_near.setData(x=data_x, y=data_y)
                 except:
                     LOGGER.error('focus_near not found')
@@ -849,6 +878,7 @@ class MyWindowClass(QtWidgets.QMainWindow, gui.Ui_MainWindow):
                     data_y = self.config["lens"][self.lens_name]["motor"]["curves"]["focus_ir"]["y"]                    
                     data_x = [i-pull_off for i in data_x]
                     data_y = [i-pull_off for i in data_y]
+                    (data_x, data_y) = approximate_spline(data_x, data_y, interpolate_count)
                     self.plot_focus_ir.setData(x=data_x, y=data_y)
                 except:
                     LOGGER.error('focus_ir not found')
