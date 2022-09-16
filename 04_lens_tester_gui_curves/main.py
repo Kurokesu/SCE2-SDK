@@ -16,6 +16,7 @@ import queue
 import utils
 import motion
 import gui
+from scipy.interpolate import interp1d
 
 import logging
 LOGGER = logging.getLogger(__name__)
@@ -89,6 +90,7 @@ class MyWindowClass(QtWidgets.QMainWindow, gui.Ui_MainWindow):
         self.source_filename = ""        
         self.status = Status()
         self.lens_name = None
+        self.zoom_slider_memory = 0
 
         # load settings from json
         self.config = {}
@@ -114,6 +116,8 @@ class MyWindowClass(QtWidgets.QMainWindow, gui.Ui_MainWindow):
         self.group_filter2.setEnabled(False)
         self.group_pi.setEnabled(False)
         self.group_iris.setEnabled(False)
+        self.group_homing.setEnabled(False)
+        self.group_keypoints.setEnabled(False)
         self.group_x_axis.setEnabled(False)
         self.group_y_axis.setEnabled(False)
         self.group_z_axis.setEnabled(False)
@@ -141,6 +145,7 @@ class MyWindowClass(QtWidgets.QMainWindow, gui.Ui_MainWindow):
         self.hw.strVersion.connect(self.serVersion)
         self.hw.strError.connect(self.strError)
         self.hw.serFeedback.connect(self.serFeedback)
+        self.hw.log_rx.connect(self.add_log_response)
         self.hw.moveToThread(self.thread_serial)
         self.thread_serial.started.connect(self.hw.serial_worker)
         self.thread_serial.start()
@@ -169,6 +174,7 @@ class MyWindowClass(QtWidgets.QMainWindow, gui.Ui_MainWindow):
         self.btn_y_seek.clicked.connect(self.btn_y_seek_clicked)
         self.btn_z_seek.clicked.connect(self.btn_z_seek_clicked)
         self.btn_a_seek.clicked.connect(self.btn_a_seek_clicked)
+        self.btn_all_seek.clicked.connect(self.btn_all_seek_clicked)
 
         self.push_pr1_set.clicked.connect(self.push_pr1_set_clicked)
         self.push_pr2_set.clicked.connect(self.push_pr2_set_clicked)
@@ -181,6 +187,15 @@ class MyWindowClass(QtWidgets.QMainWindow, gui.Ui_MainWindow):
         self.push_pr3_go.clicked.connect(self.push_pr3_go_clicked)
         self.push_pr4_go.clicked.connect(self.push_pr4_go_clicked)
         self.push_pr5_go.clicked.connect(self.push_pr5_go_clicked)
+        
+        self.btn_save_keypoint1.clicked.connect(self.btn_save_keypoint1_clicked)
+        self.btn_new_keypoint1.clicked.connect(self.btn_new_keypoint1_clicked)
+        self.btn_test_keypoint.clicked.connect(self.btn_test_keypoint_clicked)
+
+        self.zoom_slider.valueChanged.connect(self.zoom_slider_changed)
+
+
+        
 
 
 
@@ -228,12 +243,161 @@ class MyWindowClass(QtWidgets.QMainWindow, gui.Ui_MainWindow):
         self.manual_control = manual_control.ManualControl(self.hw)
         self.monitor = monitor.CommunicationsMonitor()
         self.hw.log_tx.connect(self.monitor.add_log_cmd)
-        self.hw.log_rx.connect(self.monitor.add_log_response)
 
         '''
 
 
+    def zoom_slider_changed(self):
+        interpolate_count = 250 # TODO: move to config
 
+        curve_focus_inf = self.config["lens"][self.lens_name]["motor"]["curves"]["focus_inf"]
+        curve_zoom_correction = self.config["lens"][self.lens_name]["motor"]["curves"]["zoom_correction"]
+
+        f1 = interp1d(curve_focus_inf["x"], curve_focus_inf["y"], kind='cubic')
+        x1new = np.linspace(min(curve_focus_inf["x"]), max(curve_focus_inf["x"]), num=interpolate_count, endpoint=True)
+
+        f2 = interp1d(curve_zoom_correction["x"], curve_zoom_correction["y"], kind='cubic')
+        x2new = np.linspace(min(curve_zoom_correction["x"]), max(curve_zoom_correction["x"]), num=interpolate_count, endpoint=True)
+
+        i_min = min(curve_zoom_correction["x"])
+        i_max = max(curve_zoom_correction["x"])
+
+
+        normalized100 = interp1d((0, 100), (i_max, i_min))
+        pos_from = self.zoom_slider_memory
+        pos_to = self.sender().value()
+        diff = np.abs(pos_from-pos_to)
+        resolution = 0.5
+        self.zoom_slider_memory = pos_to # backup last value
+        
+        for i in np.linspace(normalized100(pos_from), normalized100(pos_to), int(diff/resolution), endpoint=True):
+            cmd = "G90"
+            cmd += " X"+str(i)
+            cmd += " Y"+str(f1(i))
+            cmd += " Z"+str(f2(i))
+            cmd += " F2000"
+
+            self.hw.send_buffered(cmd+"\n")
+
+        
+    def btn_test_keypoint_clicked(self):
+        '''
+        cmd = "G90 X1 Y1 Z0 A0 F1000"
+        self.hw.send_buffered(cmd+"\n")
+
+        cmd = "G90 X2 Y1 Z0 A0 F1000"
+        self.hw.send_buffered(cmd+"\n")
+
+        cmd = "G90 X3 Y1 Z0 A0 F1000"
+        self.hw.send_buffered(cmd+"\n")
+
+        cmd = "G90 X4 Y1 Z0 A0 F1000"
+        self.hw.send_buffered(cmd+"\n")
+        '''
+
+        interpolate_count = 250 # TODO: move to config
+
+        curve_focus_inf = self.config["lens"][self.lens_name]["motor"]["curves"]["focus_inf"]
+        curve_zoom_correction = self.config["lens"][self.lens_name]["motor"]["curves"]["zoom_correction"]
+
+        f1 = interp1d(curve_focus_inf["x"], curve_focus_inf["y"], kind='cubic')
+        x1new = np.linspace(min(curve_focus_inf["x"]), max(curve_focus_inf["x"]), num=interpolate_count, endpoint=True)
+
+        f2 = interp1d(curve_zoom_correction["x"], curve_zoom_correction["y"], kind='cubic')
+        x2new = np.linspace(min(curve_zoom_correction["x"]), max(curve_zoom_correction["x"]), num=interpolate_count, endpoint=True)
+
+        i_min = min(curve_zoom_correction["x"])
+        i_max = max(curve_zoom_correction["x"])
+
+
+        '''
+        for i in range(len(x1new)):
+            cmd = "G90"
+            cmd += " X"+str(x1new[i])
+            cmd += " Y"+str(f1(x1new[i]))
+            cmd += " Z"+str(f2(x1new[i]))
+            cmd += " F1000"
+
+            #self.hw.send_buffered(cmd+"\n")
+            #print(cmd)
+        '''
+
+        for i in np.linspace(i_min, i_max, 100, endpoint=True):
+            cmd = "G90"
+            cmd += " X"+str(i)
+            cmd += " Y"+str(f1(i))
+            cmd += " Z"+str(f2(i))
+            cmd += " F1000"
+
+            self.hw.send_buffered(cmd+"\n")
+            #print(cmd)
+
+
+        #self.hw.send_buffered("?\n")
+        #print(cmd)
+
+        # TODO: wait until motion is over -> display 
+        
+        #print(x1new, f1(x1new))
+
+
+               
+
+                
+
+
+
+        '''
+
+        for curve in self.config["lens"][self.lens_name]["motor"]["curves"]:
+            try:
+                lens_yaml = self.config["lens"][self.lens_name]["motor"]["curves"][curve]
+                pull_off = lens_yaml["pulloff"]
+                data_x = lens_yaml["x"]
+                data_y = lens_yaml["y"]
+                data_x = [i-pull_off for i in data_x]
+                data_y = [i-pull_off for i in data_y]
+
+                # Dots                        
+                pen1 = pg.mkPen(color=lens_yaml["color"])
+                im_p = self.plot.plot(pen=None, symbol='o', symbolSize = 3, symbolPen=pen1)
+                im_p.setData(data_x, data_y)
+                                    
+                # Wrong interpolation curve
+                #(data_x, data_y) = approximate_spline(data_x, data_y, interpolate_count)
+                #self.plot_focus_inf.setData(x=data_x, y=data_y)
+
+                # Interpolated curve
+                f2 = interp1d(data_x, data_y, kind='cubic')
+                xnew = np.linspace(min(data_x), max(data_x), num=interpolate_count, endpoint=True)
+                pen2 = pg.mkPen(color=lens_yaml["color"], style=QtCore.Qt.SolidLine)
+                im_i = self.plot.plot(pen=pen2, name=lens_yaml["name"])
+                im_i.setData(x=xnew, y=f2(xnew))
+
+            except Exception as e:
+                LOGGER.error(str(e))
+        '''    
+
+
+
+        
+    def btn_new_keypoint1_clicked(self):
+        with open('keypoints.txt', 'w') as f:
+            f.write('')
+
+    def btn_save_keypoint1_clicked(self):
+        with open('keypoints.txt', 'a') as f:
+            f.write(str(self.label_x_pos.text()))
+            f.write(', ')
+            f.write(str(self.label_y_pos.text()))
+            f.write(', ')
+            f.write(str(self.label_z_pos.text()))
+            f.write(', ')
+            f.write(str(self.label_a_pos.text()))
+            f.write('\r')
+
+
+  
     def push_pr1_go_clicked(self):
         preset = self.config["lens"][self.lens_name]["preset"]["p1"].split(" ")  
         cmd =  "G90"
@@ -475,6 +639,20 @@ class MyWindowClass(QtWidgets.QMainWindow, gui.Ui_MainWindow):
         self.label_pr5_z.setText(val_z)
         self.label_pr5_a.setText(val_a)
 
+
+    def btn_all_seek_clicked(self):
+        # If command is issued when lens is in telephoto position it stalls
+        #cmd = "$H"
+        #self.hw.send(cmd+"\n")
+
+        cmd = "$HX"
+        self.hw.send(cmd+"\n")
+        cmd = "$HY"
+        self.hw.send(cmd+"\n")
+        cmd = "$HZ"
+        self.hw.send(cmd+"\n")
+        cmd = "$HA"
+        self.hw.send(cmd+"\n")
 
 
     def btn_x_seek_clicked(self):
@@ -757,12 +935,13 @@ class MyWindowClass(QtWidgets.QMainWindow, gui.Ui_MainWindow):
                 if "iris"  in self.config["lens"][self.lens_name]:
                     self.group_iris.setEnabled(True)
 
-
                 self.group_p1.setEnabled(True)
                 self.group_p2.setEnabled(True)
                 self.group_p3.setEnabled(True)
                 self.group_p4.setEnabled(True)
                 self.group_p5.setEnabled(True)
+                self.group_homing.setEnabled(True)
+                self.group_keypoints.setEnabled(True)
 
                 preset = self.config["lens"][self.lens_name]["preset"]["p1"].split(" ")
                 self.label_pr1_x.setText(preset[0])
@@ -817,85 +996,64 @@ class MyWindowClass(QtWidgets.QMainWindow, gui.Ui_MainWindow):
 
                 # ------------------
 
-                #self.plot = self.win.addPlot(axisItems={'bottom': TimeAxisItem(orientation='bottom')})
                 self.plot = self.win.addPlot()
                 self.plot.showGrid(True, True, 0.2)
                 self.plot.setMenuEnabled(enableMenu=False)
                 self.plot.hideButtons()
                 self.plot.setMouseEnabled(x=False, y=False)
-                
-                self.plot_focus_inf = self.plot.plot(pen='blue')
-                self.plot_focus_near = self.plot.plot(pen='teal')
-                self.plot_focus_ir = self.plot.plot(pen='red')
-                self.plot_correction = self.plot.plot(pen='gray')
-                
-                # self.curve = plot.plot(pen=pg.mkPen('r', width=2)) # slow
-                #self.phigh = self.plot.plot(pen=(50, 200, 50, 100))
-                #self.plow = self.plot.plot(pen=(50, 200, 50, 100))
-                #pfill = pg.FillBetweenItem(self.phigh, self.plow, brush=(100, 255, 100, 100))
-                #self.plot.addItem(pfill)
-                
-                # TODO: move to config file, plot once loaded
+                self.plot.addLegend()
+                                                
                 # TODO: clean after fresh load
-                # TODO: add legend
                 
-                # FIXME: for now assume all axes has same pull-off distance
-                #pull_off = self.config["lens"][self.lens_name]["motor"]["homing_pulloff"]["value"]
-                pull_off = -0.5
-                interpolate_count = 40 # TBD: move to config
-                try:
-                    data_x = self.config["lens"][self.lens_name]["motor"]["curves"]["focus_inf"]["x"]
-                    data_y = self.config["lens"][self.lens_name]["motor"]["curves"]["focus_inf"]["y"]
-                    data_x = [i-pull_off for i in data_x]
-                    data_y = [i-pull_off for i in data_y]
-                    (data_x, data_y) = approximate_spline(data_x, data_y, interpolate_count)
-                    self.plot_focus_inf.setData(x=data_x, y=data_y)
-                except:
-                    LOGGER.error('focus_inf not found')
+                interpolate_count = 100 # TBD: move to config
 
-                try:
-                    data_x = self.config["lens"][self.lens_name]["motor"]["curves"]["zoom_correction"]["x"]
-                    data_y = self.config["lens"][self.lens_name]["motor"]["curves"]["zoom_correction"]["y"]
-                    data_x = [i-pull_off for i in data_x]
-                    data_y = [i-pull_off for i in data_y]
-                    (data_x, data_y) = approximate_spline(data_x, data_y, interpolate_count)
-                    self.plot_correction.setData(x=data_x, y=data_y)
-                except:
-                    LOGGER.error('zoom_correction not found')
+                for curve in self.config["lens"][self.lens_name]["motor"]["curves"]:
+                    try:
+                        lens_yaml = self.config["lens"][self.lens_name]["motor"]["curves"][curve]
+                        pull_off = lens_yaml["pulloff"]
+                        data_x = lens_yaml["x"]
+                        data_y = lens_yaml["y"]
+                        data_x = [i-pull_off for i in data_x]
+                        data_y = [i-pull_off for i in data_y]
 
-                try:
-                    data_x = self.config["lens"][self.lens_name]["motor"]["curves"]["focus_near"]["x"]
-                    data_y = self.config["lens"][self.lens_name]["motor"]["curves"]["focus_near"]["y"]
-                    data_x = [i-pull_off for i in data_x]
-                    data_y = [i-pull_off for i in data_y]
-                    (data_x, data_y) = approximate_spline(data_x, data_y, interpolate_count)
-                    self.plot_focus_near.setData(x=data_x, y=data_y)
-                except:
-                    LOGGER.error('focus_near not found')
+                        # Dots                        
+                        pen1 = pg.mkPen(color=lens_yaml["color"])
+                        im_p = self.plot.plot(pen=None, symbol='o', symbolSize = 3, symbolPen=pen1)
+                        im_p.setData(data_x, data_y)
+                                            
+                        # Wrong interpolation curve
+                        #(data_x, data_y) = approximate_spline(data_x, data_y, interpolate_count)
+                        #self.plot_focus_inf.setData(x=data_x, y=data_y)
 
-                try:
-                    data_x = self.config["lens"][self.lens_name]["motor"]["curves"]["focus_ir"]["x"]
-                    data_y = self.config["lens"][self.lens_name]["motor"]["curves"]["focus_ir"]["y"]
-                    data_x = [i-pull_off for i in data_x]
-                    data_y = [i-pull_off for i in data_y]
-                    (data_x, data_y) = approximate_spline(data_x, data_y, interpolate_count)
-                    self.plot_focus_ir.setData(x=data_x, y=data_y)
-                except:
-                    LOGGER.error('focus_ir not found')
+                        # Interpolated curve
+                        f2 = interp1d(data_x, data_y, kind='cubic')
+                        xnew = np.linspace(min(data_x), max(data_x), num=interpolate_count, endpoint=True)
+                        pen2 = pg.mkPen(color=lens_yaml["color"], style=QtCore.Qt.SolidLine)
+                        im_i = self.plot.plot(pen=pen2, name=lens_yaml["name"])
+                        im_i.setData(x=xnew, y=f2(xnew))
 
+                    except Exception as e:
+                        LOGGER.error(str(e))
+                    
+
+                #ax.set_xlabel('Zoom motor (mm)')
 
                 # scater data
-                self.scatter_focus_zoom = self.plot.plot(pen=None, symbol='x', symbolPen="blue")
-                self.scatter_compensate = self.plot.plot(pen=None, symbol='x', symbolPen="gray")
+                self.scatter_focus_zoom = self.plot.plot(pen=None, symbol='x', symbolPen="gray", symbolSize = 15)
+                self.scatter_compensate = self.plot.plot(pen=None, symbol='x', symbolPen="blue", symbolSize = 15)
                 #x_data = [0]
                 #y_data = [0]
                 #self.scatter_focus_zoom.setData([0], y_data)
                 #self.scatter_compensate.setData(x_data, y_data)
 
-
-
+                #self.plot.addLegend()
+                 
+                #plt = pg.plot()
+ 
 
                 
+    def add_log_response(self, text):
+        self.label_response.setText(text.strip())
 
     def serFeedback(self, text):
         txt = text.replace('<', '').replace('>', '')
@@ -947,43 +1105,41 @@ class MyWindowClass(QtWidgets.QMainWindow, gui.Ui_MainWindow):
         self.btn_a_seek.setEnabled(True)
 
 
-        '''
         if s.limit_x:
             self.label_x_pi.setText('LOW')
-            self.label_x_pi.setStyleSheet("color: " + COLOR_RED)
-            self.btn_x_seek.setEnabled(False)
+            #self.label_x_pi.setStyleSheet("color: " + COLOR_RED)
+            #self.btn_x_seek.setEnabled(False)
         else:
             self.label_x_pi.setText('HIGH')
-            self.label_x_pi.setStyleSheet("")
-            self.btn_x_seek.setEnabled(True)
+            #self.label_x_pi.setStyleSheet("")
+            #self.btn_x_seek.setEnabled(True)
 
         if s.limit_y:
             self.label_y_pi.setText('LOW')
-            self.label_y_pi.setStyleSheet("color: " + COLOR_RED)
-            self.btn_y_seek.setEnabled(False)
+            #self.label_y_pi.setStyleSheet("color: " + COLOR_RED)
+            #self.btn_y_seek.setEnabled(False)
         else:
             self.label_y_pi.setText('HIGH')
-            self.label_y_pi.setStyleSheet("")
-            self.btn_y_seek.setEnabled(True)
+            #self.label_y_pi.setStyleSheet("")
+            #self.btn_y_seek.setEnabled(True)
 
         if s.limit_z:
             self.label_z_pi.setText('LOW')
-            self.label_z_pi.setStyleSheet("color: " + COLOR_RED)
-            self.btn_z_seek.setEnabled(False)
+            #self.label_z_pi.setStyleSheet("color: " + COLOR_RED)
+            #self.btn_z_seek.setEnabled(False)
         else:
             self.label_z_pi.setText('HIGH')
-            self.label_z_pi.setStyleSheet("")
-            self.btn_z_seek.setEnabled(True)
+            #self.label_z_pi.setStyleSheet("")
+            #self.btn_z_seek.setEnabled(True)
 
         if s.limit_a:
             self.label_a_pi.setText('LOW')
-            self.label_a_pi.setStyleSheet("color: " + COLOR_RED)
-            self.btn_a_seek.setEnabled(False)
+            #self.label_a_pi.setStyleSheet("color: " + COLOR_RED)
+            #self.btn_a_seek.setEnabled(False)
         else:
             self.label_a_pi.setText('HIGH')
-            self.label_a_pi.setStyleSheet("")
-            self.btn_a_seek.setEnabled(True)
-        '''
+            #self.label_a_pi.setStyleSheet("")
+            #self.btn_a_seek.setEnabled(True)
 
 
         self.label_buffer_count.setText(str(s.block_buffer_avail))
