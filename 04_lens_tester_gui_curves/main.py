@@ -118,6 +118,7 @@ class MyWindowClass(QtWidgets.QMainWindow, gui.Ui_MainWindow):
         self.group_iris.setEnabled(False)
         self.group_homing.setEnabled(False)
         self.group_keypoints.setEnabled(False)
+        self.group_guided_zoom1.setEnabled(False)
         self.group_x_axis.setEnabled(False)
         self.group_y_axis.setEnabled(False)
         self.group_z_axis.setEnabled(False)
@@ -192,7 +193,7 @@ class MyWindowClass(QtWidgets.QMainWindow, gui.Ui_MainWindow):
         self.btn_new_keypoint1.clicked.connect(self.btn_new_keypoint1_clicked)
         self.btn_test_keypoint.clicked.connect(self.btn_test_keypoint_clicked)
 
-        self.zoom_slider.valueChanged.connect(self.zoom_slider_changed)
+        self.zoom_slider1.valueChanged.connect(self.zoom_slider1_changed)
 
 
         
@@ -247,8 +248,8 @@ class MyWindowClass(QtWidgets.QMainWindow, gui.Ui_MainWindow):
         '''
 
 
-    def zoom_slider_changed(self):
-        interpolate_count = 250 # TODO: move to config
+    def zoom_slider1_changed(self):
+        interpolate_count = self.config["lens"][self.lens_name]["motor"]["interpolate_count"]
 
         curve_focus_inf = self.config["lens"][self.lens_name]["motor"]["curves"]["focus_inf"]
         curve_zoom_correction = self.config["lens"][self.lens_name]["motor"]["curves"]["zoom_correction"]
@@ -262,22 +263,32 @@ class MyWindowClass(QtWidgets.QMainWindow, gui.Ui_MainWindow):
         i_min = min(curve_zoom_correction["x"])
         i_max = max(curve_zoom_correction["x"])
 
-
         normalized100 = interp1d((0, 100), (i_max, i_min))
         pos_from = self.zoom_slider_memory
         pos_to = self.sender().value()
         diff = np.abs(pos_from-pos_to)
         resolution = 0.5
         self.zoom_slider_memory = pos_to # backup last value
-        
-        for i in np.linspace(normalized100(pos_from), normalized100(pos_to), int(diff/resolution), endpoint=True):
-            cmd = "G90"
-            cmd += " X"+str(i)
-            cmd += " Y"+str(f1(i))
-            cmd += " Z"+str(f2(i))
-            cmd += " F2000"
 
-            self.hw.send_buffered(cmd+"\n")
+
+        if self.lens_name == "L084":
+            for i in np.linspace(normalized100(pos_from), normalized100(pos_to), int(diff/resolution), endpoint=True):
+                cmd = "G90"
+                cmd += " X"+str(i)
+                cmd += " Y"+str(f1(i))
+                cmd += " Z"+str(f2(i))
+                cmd += " F2000"
+                self.hw.send_buffered(cmd+"\n")
+
+        if self.lens_name == "L086":
+            for i in np.linspace(normalized100(pos_from), normalized100(pos_to), int(diff/resolution), endpoint=True):
+                cmd = "G90"
+                cmd += " X"+str(i)
+                cmd += " Y"+str(f2(i))
+                cmd += " Z"+str(f1(i))
+                cmd += " F2000"
+                self.hw.send_buffered(cmd+"\n")
+
 
         
     def btn_test_keypoint_clicked(self):
@@ -645,14 +656,24 @@ class MyWindowClass(QtWidgets.QMainWindow, gui.Ui_MainWindow):
         #cmd = "$H"
         #self.hw.send(cmd+"\n")
 
-        cmd = "$HX"
-        self.hw.send(cmd+"\n")
-        cmd = "$HY"
-        self.hw.send(cmd+"\n")
-        cmd = "$HZ"
-        self.hw.send(cmd+"\n")
-        cmd = "$HA"
-        self.hw.send(cmd+"\n")
+
+        if self.lens_name == "L084":
+            cmd = "$HX"
+            self.hw.send(cmd+"\n")
+            cmd = "$HY"
+            self.hw.send(cmd+"\n")
+            cmd = "$HZ"
+            self.hw.send(cmd+"\n")
+            cmd = "$HA"
+            self.hw.send(cmd+"\n")
+
+        if self.lens_name == "L086":
+            cmd = "$HX"
+            self.hw.send(cmd+"\n")
+            cmd = "$HY"
+            self.hw.send(cmd+"\n")
+            cmd = "$HZ"
+            self.hw.send(cmd+"\n")
 
 
     def btn_x_seek_clicked(self):
@@ -942,6 +963,7 @@ class MyWindowClass(QtWidgets.QMainWindow, gui.Ui_MainWindow):
                 self.group_p5.setEnabled(True)
                 self.group_homing.setEnabled(True)
                 self.group_keypoints.setEnabled(True)
+                self.group_guided_zoom1.setEnabled(True)
 
                 preset = self.config["lens"][self.lens_name]["preset"]["p1"].split(" ")
                 self.label_pr1_x.setText(preset[0])
