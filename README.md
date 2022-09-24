@@ -8,6 +8,11 @@ Kurokesu SCF2 multi-axis stepper motor controller System On Module (SOM) based m
 * [ ] L117 (x32, 1/1.8")
 * [ ] L119 (x16, 4/3")
 
+## Zoom demonstration
+[High quality Youtube link](https://www.youtube.com/watch?v=kTpezfnXK4s)
+
+![](images/zoom.gif)
+
 ## Lens tester - GUI demo application with optical train curves
 ![](04_lens_tester_gui_curves/screenshot.png)
 
