@@ -12,11 +12,15 @@ Kurokesu SCF2 multi-axis stepper motor controller System On Module (SOM) based m
 ![](04_lens_tester_gui_curves/screenshot.png)
 
 ## Drive curves can be updated with the procedure
+* Make sure controller is running latest firmware and configuration
 * Checkout fresh sources
 * Connect and press the Home ALL button (yes, no need to home each lens individually anymore)
 * Make sure you can control the lens and reach sharp focus in all zoom ranges
 * Keypoints->New (it will erase the keypoints.txt file)
 * Move the optical train to the widest position and adjust sliders for the best focus, press Keypoints->Save
-* Move optical train towards the narrow position, adjust focus in steps (~10 should be enough)
+* There should be no duplicate x positions
+* Move optical train towards the narrow position (start saving keypoints from the other direction - right to left)
+* Adjust focus in steps (~10 should be enough)
 * Once all data points are saved, backup config.yaml file and run import_keypoints.py script. It will import calibration points (for now, using only infinity focus preset)
-* Run the main script and test with the Guided zoom slider.
+* Run the main script and test with the Guided zoom slider
+* Try to make small changes from the base curve first. At the beginning do not adjust correction axis (zoom2) and adjust only focus.
