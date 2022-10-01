@@ -110,6 +110,7 @@ class MyWindowClass(QtWidgets.QMainWindow, gui.Ui_MainWindow):
 
         # set all groups disabled
         self.group_step_size.setEnabled(False)
+        self.group_lens.setEnabled(False)
         self.group_speed.setEnabled(False)
         self.group_mdi.setEnabled(False)
         self.group_filter1.setEnabled(False)
@@ -192,6 +193,7 @@ class MyWindowClass(QtWidgets.QMainWindow, gui.Ui_MainWindow):
         self.btn_save_keypoint1.clicked.connect(self.btn_save_keypoint1_clicked)
         self.btn_new_keypoint1.clicked.connect(self.btn_new_keypoint1_clicked)
         self.btn_test_keypoint.clicked.connect(self.btn_test_keypoint_clicked)
+        self.btn_reset.clicked.connect(self.btn_reset_clicked)
 
         self.zoom_slider1.valueChanged.connect(self.zoom_slider1_changed)
 
@@ -247,6 +249,13 @@ class MyWindowClass(QtWidgets.QMainWindow, gui.Ui_MainWindow):
 
         '''
 
+    def btn_reset_clicked(self):
+        #self.hw.send_buffered(bytes.fromhex('18'))
+        self.hw.send_buffered('\x18')
+        self.hw.send_buffered('?')
+        #cmd = "M254"
+        #self.hw.send_buffered(cmd+"\n")
+
 
     def zoom_slider1_changed(self):
         interpolate_count = self.config["lens"][self.lens_name]["motor"]["interpolate_count"]
@@ -277,6 +286,15 @@ class MyWindowClass(QtWidgets.QMainWindow, gui.Ui_MainWindow):
                 cmd += " X"+str(i)
                 cmd += " Y"+str(f1(i))
                 cmd += " Z"+str(f2(i))
+                cmd += " F2000"
+                self.hw.send_buffered(cmd+"\n")
+
+        if self.lens_name == "L117":
+            for i in np.linspace(normalized100(pos_from), normalized100(pos_to), int(diff/resolution), endpoint=True):
+                cmd = "G90"
+                cmd += " X"+str(i)
+                cmd += " Y"+str(f2(i))
+                cmd += " Z"+str(f1(i))
                 cmd += " F2000"
                 self.hw.send_buffered(cmd+"\n")
 
@@ -667,6 +685,16 @@ class MyWindowClass(QtWidgets.QMainWindow, gui.Ui_MainWindow):
             cmd = "$HA"
             self.hw.send(cmd+"\n")
 
+        if self.lens_name == "L117":
+            cmd = "$HA"
+            self.hw.send(cmd+"\n")
+            cmd = "$HX"
+            self.hw.send(cmd+"\n")
+            cmd = "$HZ"
+            self.hw.send(cmd+"\n")
+            cmd = "$HY"
+            self.hw.send(cmd+"\n")
+
         if self.lens_name == "L086":
             cmd = "$HX"
             self.hw.send(cmd+"\n")
@@ -905,7 +933,10 @@ class MyWindowClass(QtWidgets.QMainWindow, gui.Ui_MainWindow):
                 self.label_lens_name.setText(self.lens_name)
                 lens_detected = True
 
-
+            if i[0:3] == "EFJ":
+                self.lens_name = "L117"
+                self.label_lens_name.setText(self.lens_name)
+                lens_detected = True
 
 
             if lens_detected:
@@ -927,6 +958,8 @@ class MyWindowClass(QtWidgets.QMainWindow, gui.Ui_MainWindow):
 
 
                 self.group_speed.setEnabled(True)
+                self.group_lens.setEnabled(True)
+
                 self.combo_speed.clear()                
                 default_speed = None
                 speed_list = self.config["lens"][self.lens_name]["motor"]["speed_list"].split(" ")

@@ -164,8 +164,12 @@ class SerialComm(QObject):
 
                                 if retry_cnt > 0:
                                     LOGGER.info("* Retry count:"+str(retry_cnt))
+                                    #if retry_cnt > 100:
+                                    #    LOGGER.info("Forced break - reset controller")
+                                    #    self.__ser_send(ser, '\x18', monitor=False)
+                                    #    break
 
-                                retry_cnt += 1
+                                retry_cnt += 1                                
 
                             ser.timeout = backup_timeout
 
@@ -253,8 +257,6 @@ class SerialComm(QObject):
                                             break
                             except Exception as e:
                                 print("Parse error", e)
-
-
 
                         ser.timeout = backup_timeout
                         self.__ser_send(ser, f)
