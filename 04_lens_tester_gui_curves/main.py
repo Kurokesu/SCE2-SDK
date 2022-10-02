@@ -60,6 +60,7 @@ class Status():
     limit_y = bool
     limit_z = bool
     limit_a = bool
+    limit_available = bool
 
     pos_x = float
     pos_y = float
@@ -250,11 +251,21 @@ class MyWindowClass(QtWidgets.QMainWindow, gui.Ui_MainWindow):
         '''
 
     def btn_reset_clicked(self):
+        # this works
+        #self.hw.send_buffered('\x18')
+        #self.hw.send_buffered('?')
+
+        # ---------
+
         #self.hw.send_buffered(bytes.fromhex('18'))
-        self.hw.send_buffered('\x18')
-        self.hw.send_buffered('?')
+  
+        #M120 P1
         #cmd = "M254"
         #self.hw.send_buffered(cmd+"\n")
+
+        #cmd = "M120 P1"
+        #self.hw.send_buffered(cmd+"\n")
+        pass
 
 
     def zoom_slider1_changed(self):
@@ -690,9 +701,14 @@ class MyWindowClass(QtWidgets.QMainWindow, gui.Ui_MainWindow):
             self.hw.send(cmd+"\n")
             cmd = "$HX"
             self.hw.send(cmd+"\n")
-            cmd = "$HZ"
-            self.hw.send(cmd+"\n")
+            
+            # workaround for "smetimes lens will not home Y and Z axis" issue
+            #cmd = "G91 G0 Y2 Z2"
+            #self.hw.send(cmd+"\n")
+                       
             cmd = "$HY"
+            self.hw.send(cmd+"\n")
+            cmd = "$HZ"
             self.hw.send(cmd+"\n")
 
         if self.lens_name == "L086":
@@ -1126,8 +1142,10 @@ class MyWindowClass(QtWidgets.QMainWindow, gui.Ui_MainWindow):
             s.limit_y = False
             s.limit_z = False
             s.limit_a = False
+            s.limit_available = False
 
             if p[0:2] == "Pn":
+                s.limit_available = True
                 temp1 = p.split(":")[1]
                 s.limit_x = "X" in temp1
                 s.limit_y = "Y" in temp1
@@ -1159,42 +1177,42 @@ class MyWindowClass(QtWidgets.QMainWindow, gui.Ui_MainWindow):
         self.btn_z_seek.setEnabled(True)
         self.btn_a_seek.setEnabled(True)
 
+        if s.limit_available:
+            if s.limit_x:
+                self.label_x_pi.setText('LOW')
+                #self.label_x_pi.setStyleSheet("color: " + COLOR_RED)
+                #self.btn_x_seek.setEnabled(False)
+            else:
+                self.label_x_pi.setText('HIGH')
+                #self.label_x_pi.setStyleSheet("")
+                #self.btn_x_seek.setEnabled(True)
 
-        if s.limit_x:
-            self.label_x_pi.setText('LOW')
-            #self.label_x_pi.setStyleSheet("color: " + COLOR_RED)
-            #self.btn_x_seek.setEnabled(False)
-        else:
-            self.label_x_pi.setText('HIGH')
-            #self.label_x_pi.setStyleSheet("")
-            #self.btn_x_seek.setEnabled(True)
+            if s.limit_y:
+                self.label_y_pi.setText('LOW')
+                #self.label_y_pi.setStyleSheet("color: " + COLOR_RED)
+                #self.btn_y_seek.setEnabled(False)
+            else:
+                self.label_y_pi.setText('HIGH')
+                #self.label_y_pi.setStyleSheet("")
+                #self.btn_y_seek.setEnabled(True)
 
-        if s.limit_y:
-            self.label_y_pi.setText('LOW')
-            #self.label_y_pi.setStyleSheet("color: " + COLOR_RED)
-            #self.btn_y_seek.setEnabled(False)
-        else:
-            self.label_y_pi.setText('HIGH')
-            #self.label_y_pi.setStyleSheet("")
-            #self.btn_y_seek.setEnabled(True)
+            if s.limit_z:
+                self.label_z_pi.setText('LOW')
+                #self.label_z_pi.setStyleSheet("color: " + COLOR_RED)
+                #self.btn_z_seek.setEnabled(False)
+            else:
+                self.label_z_pi.setText('HIGH')
+                #self.label_z_pi.setStyleSheet("")
+                #self.btn_z_seek.setEnabled(True)
 
-        if s.limit_z:
-            self.label_z_pi.setText('LOW')
-            #self.label_z_pi.setStyleSheet("color: " + COLOR_RED)
-            #self.btn_z_seek.setEnabled(False)
-        else:
-            self.label_z_pi.setText('HIGH')
-            #self.label_z_pi.setStyleSheet("")
-            #self.btn_z_seek.setEnabled(True)
-
-        if s.limit_a:
-            self.label_a_pi.setText('LOW')
-            #self.label_a_pi.setStyleSheet("color: " + COLOR_RED)
-            #self.btn_a_seek.setEnabled(False)
-        else:
-            self.label_a_pi.setText('HIGH')
-            #self.label_a_pi.setStyleSheet("")
-            #self.btn_a_seek.setEnabled(True)
+            if s.limit_a:
+                self.label_a_pi.setText('LOW')
+                #self.label_a_pi.setStyleSheet("color: " + COLOR_RED)
+                #self.btn_a_seek.setEnabled(False)
+            else:
+                self.label_a_pi.setText('HIGH')
+                #self.label_a_pi.setStyleSheet("")
+                #self.btn_a_seek.setEnabled(True)
 
 
         self.label_buffer_count.setText(str(s.block_buffer_avail))

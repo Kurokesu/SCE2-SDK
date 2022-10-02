@@ -924,6 +924,7 @@ class Ui_MainWindow(object):
         self.label_lens_name.setObjectName("label_lens_name")
         self.gridLayout_7.addWidget(self.label_lens_name, 0, 0, 1, 1)
         self.btn_reset = QtWidgets.QPushButton(self.group_lens)
+        self.btn_reset.setEnabled(False)
         sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Maximum, QtWidgets.QSizePolicy.Fixed)
         sizePolicy.setHorizontalStretch(0)
         sizePolicy.setVerticalStretch(0)
