@@ -697,15 +697,14 @@ class MyWindowClass(QtWidgets.QMainWindow, gui.Ui_MainWindow):
             self.hw.send(cmd+"\n")
 
         if self.lens_name == "L117":
+            # Workaround. Sometimes if Z is in -4..-2 Y axis can't home
+            cmd = "G91 G0 Z2"
+            self.hw.send(cmd+"\n")
+
             cmd = "$HA"
             self.hw.send(cmd+"\n")
             cmd = "$HX"
-            self.hw.send(cmd+"\n")
-            
-            # workaround for "smetimes lens will not home Y and Z axis" issue
-            #cmd = "G91 G0 Y2 Z2"
-            #self.hw.send(cmd+"\n")
-                       
+            self.hw.send(cmd+"\n")                              
             cmd = "$HY"
             self.hw.send(cmd+"\n")
             cmd = "$HZ"

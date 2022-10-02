@@ -8,6 +8,7 @@ parser = argparse.ArgumentParser(description='Send parameters to SCE2 controller
 parser.add_argument('-p', '--port', help='COM port', required=True, type=str)
 parser.add_argument('-l', '--lens', help='Parameter file for particular lens', required=True, type=str)
 parser.add_argument('-d', '--delay', help='Delay to sleep between each sent parameter line', default=0.001, type=float)
+parser.add_argument('-s', '--sn', help='Provide serial number', default=0.001, type=str)
 args = parser.parse_args()
 
 ser = serial.Serial()
@@ -29,4 +30,8 @@ for i in tqdm(content):
 	ser.write(bytes(i.strip()+"\r", 'utf8'))
 	packet = ser.read(2).decode("utf-8")
 
-	
+if args.sn:
+	ser.flushInput()
+	ser.flushOutput()
+	ser.write(bytes("$I="+args.sn.strip()+"\r", 'utf8'))
+	packet = ser.read(2).decode("utf-8")
