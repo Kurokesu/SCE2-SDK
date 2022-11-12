@@ -1,0 +1,13 @@
+*.pyc
+__pycache__
+dist
+build
+.idea
+out
+*.bat
+*.spec
+*.log
+*.log.*
+*.bak
+*.lnk
+keypoints.txt

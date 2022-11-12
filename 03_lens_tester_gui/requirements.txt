@@ -1,0 +1,8 @@
+pyyaml
+pyqt5
+numpy
+pyserial
+pyqtgraph
+ezdxf
+scipy
+zmq
