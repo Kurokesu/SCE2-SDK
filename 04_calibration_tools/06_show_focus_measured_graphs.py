@@ -34,14 +34,23 @@ for kp in tqdm(results["kp"], position=0):
                 ts_gap = ts_abs_gap
                 best_motor = p
 
-        x.append(motor_list[best_motor]["x"])
-        x1.append(motor_list[best_motor]["x"]+picture_list[i]["sharpness"]/5)
-        x2.append(motor_list[best_motor]["x"]-picture_list[i]["sharpness"]/5)    
-        y.append(motor_list[best_motor]["y"])
+        if results["lens"] == "L117":
+            x.append(motor_list[best_motor]["x"])
+            x1.append(motor_list[best_motor]["x"]+picture_list[i]["sharpness"]/5)
+            #x2.append(motor_list[best_motor]["x"]-picture_list[i]["sharpness"]/5)    
+            y.append(motor_list[best_motor]["y"])
+
+        if results["lens"] == "L086":
+            x.append(motor_list[best_motor]["x"])
+            x1.append(motor_list[best_motor]["x"]+picture_list[i]["sharpness"]/5)
+            #x2.append(motor_list[best_motor]["x"]-picture_list[i]["sharpness"]/5)    
+            y.append(motor_list[best_motor]["y"])
+
 
     ax.plot(x, y, '--', linewidth=0.5, label=str(kp), color='black')
     ax.plot(x1, y, linewidth=0.5, label=str(kp), color='b')
     #ax.plot(x2, y, linewidth=0.5, label=str(kp), color='b')
     ax.fill_betweenx(y, x1, x, alpha = 0.2, color='b')
+
 
 plt.show()

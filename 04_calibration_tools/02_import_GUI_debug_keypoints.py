@@ -15,8 +15,8 @@ with open(cfg_file) as f:
     f.close()
 print("OK")
 
-
 lens = config["last_lens"]
+keypoints["lens"] = lens
 focus_curve = "focus_inf"
 correction_curve = "zoom_correction"
 

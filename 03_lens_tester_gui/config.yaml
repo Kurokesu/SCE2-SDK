@@ -1,9 +1,9 @@
-boot_count: 987
+boot_count: 993
 clean_exit: true
 com_baud: 115200
 com_timeout: 5
 controller_feedback_interval: 50
-last_lens: L086
+last_lens: L117
 lens:
   L084:
     debug_keypoints:
@@ -284,7 +284,7 @@ lens:
           - -2.4
           - -4.1
           - -1.6
-          - 1.0
+          - 1.4
           - 3.1
           - 5.0
         zoom_correction:
@@ -293,12 +293,12 @@ lens:
           pulloff: 0
           x: *id001
           y:
-          - -3.208
-          - 0.549
-          - 3.086
-          - 4.195
-          - 5.194
-          - 5.783
+          - -3.2
+          - 0.51
+          - 3.034
+          - 4.643
+          - 5.142
+          - 5.745
       default_speed: 1000
       function:
         axis_a: null
@@ -479,5 +479,5 @@ lens:
       image_circle: 9.2
       lpm: 250
 logging_level: DEBUG
-port: COM149
+port: COM165
 remember_last_com_port: true

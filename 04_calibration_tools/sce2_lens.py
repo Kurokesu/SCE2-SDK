@@ -49,8 +49,13 @@ class SCE2():
             self.lens_detected = False
             if i[0:3] == "EFJ":
                 self.lens_name = "L117"
-                #print("L117")
-    
+            if i[0:3] == "6ZG":
+                self.lens_name = "L086"   
+            if i[0:3] == "LS8":
+                self.lens_name = "L085"
+            if i[0:3] == "JWF":
+                self.lens_name = "L084"
+
 
     def send_command(self, cmd, echo=True, expecting_lines=1, flush=True):    
         if flush:
@@ -219,6 +224,24 @@ class SCE2():
             self.send_command("$HZ", echo=False)
             if echo:
                 print(" Done")
+
+        if self.lens_name == "L086":
+            if echo:
+                print("Homing L086 lens...", end = '')
+            if echo:
+                print("X", end = '')
+            self.send_command("$HX", echo=False)
+            if echo:
+                print("Y", end = '')
+            self.send_command("$HY", echo=False)
+            if echo:
+                print("Z", end = '')
+            self.send_command("$HZ", echo=False)
+            if echo:
+                print(" Done")
+
+
+
 
 
 class SCE2_HAL():
