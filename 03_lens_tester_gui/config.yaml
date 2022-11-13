@@ -1,9 +1,9 @@
-boot_count: 993
+boot_count: 995
 clean_exit: true
 com_baud: 115200
 com_timeout: 5
 controller_feedback_interval: 50
-last_lens: L117
+last_lens: L086
 lens:
   L084:
     debug_keypoints:
@@ -479,5 +479,5 @@ lens:
       image_circle: 9.2
       lpm: 250
 logging_level: DEBUG
-port: COM165
+port: COM149
 remember_last_com_port: true

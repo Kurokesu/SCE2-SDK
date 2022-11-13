@@ -35,6 +35,7 @@ print("Detecting lens:", lens.lens_name)
 
 results = {}
 results["kp"] = {}
+results["lens"] = lens.lens_name
 
 for kp in tqdm(keypoints["kp"], desc="Capturing frames"):
     #print()
@@ -103,7 +104,6 @@ for kp in tqdm(keypoints["kp"], desc="Capturing frames"):
 
     #print("Saving images")
     results["kp"][kp]["pic"] = []
-
 
     file_names = reply.split(",")[1:]
     for f in file_names:
