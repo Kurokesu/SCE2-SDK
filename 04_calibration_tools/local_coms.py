@@ -81,3 +81,16 @@ class LOCAL_COMS_NODE():
             tx_ok = False
         
         return tx_ok
+
+
+
+
+
+if __name__ == '__main__':
+    z = LOCAL_COMS_MASTER()
+
+    while True:
+        text = input("Enter cmd: ")
+        reply, status, t = z.msg_text(text)
+        print(reply, status, t)
+        print()        

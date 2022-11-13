@@ -7,67 +7,39 @@ import local_coms
 
 z = local_coms.LOCAL_COMS_MASTER()
 
-
+print("Loading data file... ", end = '')
 keypoints = {}
 lens_name = None
 with open("results\\keypoints.yaml") as f:
     keypoints = yaml.load(f, Loader=yaml.FullLoader)
     f.close()
+print("Ok")
 
 
+print("Loading config file... ", end = '')
 config = {}
 cfg_file = "../03_lens_tester_gui/config.yaml"
 with open(cfg_file) as f:
     config = yaml.load(f, Loader=yaml.FullLoader)
     f.close()
+print("Ok")
 
-
-lens = sce2_lens.SCE2(config["port"])
-ver = lens.send_command("$I", echo=False, expecting_lines=3)
-print(ver)
-
-
-#cam = uvc_camera.Camera(0)
-#cam.start_task()
 
 reply, status, t = z.msg_text("show")
-#time.sleep(2)
-#reply, status, t = z.msg_text("hide")
-#sys.exit(1)
-
 
 # detect lens
-txt = ver[0].replace('[', '').replace(']', '')
-txt_list = txt.split(':')    
-id_strings = txt_list[2].split(',')
-for i in id_strings:
-    lens_detected = False
-    if i[0:3] == "EFJ":
-        lens_name = "L117"
-        print("Homing L117")
-        # TODO: check which lens it is. Home each lens according
-        # Workaround for L117. Sometimes if Z is in -4..-2 Y axis can't home
-        lens.send_command("G91 G0 Z2")
-        lens.wait_for_idle(echo=False)
-        lens.send_command("$HA")
-        lens.send_command("$HX")
-        lens.send_command("$HY")
-        lens.send_command("$HZ")
-
-#############################
-# TODO: add other lens homing
-#############################
-
-
+print("Using port:", config["port"])
+lens = sce2_lens.SCE2(config["port"])
+print("Detecting lens:", lens.lens_name)
 
 
 results = {}
 results["kp"] = {}
 
-for kp in keypoints["kp"]:
-    print()
-    print("-------------------------")
-    print("Key point:", kp)
+for kp in tqdm(keypoints["kp"], desc="Capturing frames"):
+    #print()
+    #print("-------------------------")
+    #print("Key point:", kp)
 
     '''
     print("Homing")
@@ -82,7 +54,7 @@ for kp in keypoints["kp"]:
     '''
 
 
-    print("Moving fast original sharp position")
+    #print("Moving fast original sharp position")
     cmd =  "G90 G1"
     cmd += " X"
     cmd += str(keypoints["kp"][kp]["x"])
@@ -94,42 +66,42 @@ for kp in keypoints["kp"]:
     cmd += "0"
     cmd += " F"
     cmd += "1000"
-    lens.send_command(cmd)
+    lens.send_command(cmd, echo=False)
     lens.wait_for_idle(echo=False)
 
-    print("Moving to min Y fast")
+    #print("Moving to min Y fast")
     cmd =  "G90 G1"
     cmd += " Y"
     cmd += str(keypoints["kp"][kp]["miny"])
     cmd += " F"
     cmd += "1000"
-    lens.send_command(cmd)
+    lens.send_command(cmd, echo=False)
     lens.wait_for_idle(echo=False)
 
-    print("Moving to max Y slow")
+    #print("Moving to max Y slow")
     cmd =  "G90 G1"
     cmd += " Y"
     cmd += str(keypoints["kp"][kp]["maxy"])
     cmd += " F"
     cmd += "1"
     z.msg_text("record")
-    lens.send_command(cmd)
+    lens.send_command(cmd, echo=False)
     positions = lens.wait_for_idle(echo=False)
     reply, status, t = z.msg_text("stop")
-    print("Done")
+    #print("Done")
 
 
     results["kp"][kp] = {}
 
-    print()
-    print("Saving positions")
+    #print()
+    #print("Saving positions")
     results["kp"][kp]["pos"] = []
     for p in positions:
         pos = {}
         pos["x"], pos["y"], pos["z"], pos["x_lim"], pos["y_lim"], pos["z_lim"], pos["timestamp"], pos["status"] = p  
         results["kp"][kp]["pos"].append(pos)
 
-    print("Saving images")
+    #print("Saving images")
     results["kp"][kp]["pic"] = []
 
 
@@ -159,8 +131,7 @@ for kp in keypoints["kp"]:
 
 reply, status, t = z.msg_text("hide")
 
-print("Saving results")
+print("Saving data file... ", end = '')
 with open("results\\results.yaml", 'w') as f:
     yaml.dump(results, f)
-
-
+print("Ok")

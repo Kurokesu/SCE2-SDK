@@ -7,11 +7,13 @@ from tqdm import tqdm
 keypoints = {}
 keypoints["kp"] = {}
 
+print("Loading data... ", end = '')
 config = {}
 cfg_file = "../03_lens_tester_gui/config.yaml"
 with open(cfg_file) as f:
     config = yaml.load(f, Loader=yaml.FullLoader)
     f.close()
+print("OK")
 
 
 lens = config["last_lens"]
@@ -24,7 +26,6 @@ print("Importing", lens, "lens keypoints")
 curve1 = config["lens"][lens]["motor"]["curves"][focus_curve]
 curve2 = config["lens"][lens]["motor"]["curves"][correction_curve]
 
-
 for i in range(len(curve1["x"])):
     #print(i)
     keypoints["kp"][i] = {}
@@ -34,17 +35,18 @@ for i in range(len(curve1["x"])):
     keypoints["kp"][i]["y"] = curve2["y"][i] # !! z/y
     keypoints["kp"][i]["z"] = curve1["y"][i] # !! z/y
     
-    span = 0.5
+    #span = 0.5
+    span = 1
 
     keypoints["kp"][i]["maxy"] = keypoints["kp"][i]["y"] + span
     keypoints["kp"][i]["miny"] = keypoints["kp"][i]["y"] - span
     
     keypoints["kp"][i]["maxz"] = keypoints["kp"][i]["z"] + span
     keypoints["kp"][i]["minz"] = keypoints["kp"][i]["z"] - span
+
    
-    
+print("Saving data file... ", end = '')    
 kpt_file = "results\\keypoints.yaml"
 with open(kpt_file, 'w') as f:
     yaml.dump(keypoints, f)
-
 print("Done")

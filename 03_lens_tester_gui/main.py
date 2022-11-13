@@ -23,11 +23,7 @@ import logging
 LOGGER = logging.getLogger(__name__)
 LOGGER.info('start')
 
-COLOR_GREEN = '#33cc33'
-COLOR_YELLOW = '#E5B500'
-COLOR_RED = '#C0150E'
 SETTINGS_FILE = 'config.yaml'
-
 
 
 def approximate_spline(data_x, data_y, point_count):
@@ -93,6 +89,7 @@ class MyWindowClass(QtWidgets.QMainWindow, gui.Ui_MainWindow):
         self.status = Status()
         self.lens_name = None
         self.zoom_slider_memory = 0
+        self.dbg_keypoints = None
 
         s_global = Status()
 
@@ -194,19 +191,24 @@ class MyWindowClass(QtWidgets.QMainWindow, gui.Ui_MainWindow):
         self.push_pr4_go.clicked.connect(self.push_pr4_go_clicked)
         self.push_pr5_go.clicked.connect(self.push_pr5_go_clicked)
         
-        self.btn_new_keypoint.clicked.connect(self.btn_new_keypoint_clicked)
-        self.btn_keypoint_mark_focused.clicked.connect(self.btn_keypoint_mark_focused_clicked)
-        self.btn_save_keypoint_miny.clicked.connect(self.btn_save_keypoint_miny_clicked)
-        self.btn_save_keypoint_maxy.clicked.connect(self.btn_save_keypoint_maxy_clicked)
-        self.btn_save_keypoint_minz.clicked.connect(self.btn_save_keypoint_minz_clicked)
-        self.btn_save_keypoint_maxz.clicked.connect(self.btn_save_keypoint_maxz_clicked)
-        self.btn_new_keypoint_file.clicked.connect(self.btn_new_keypoint_file_clicked)
-        self.btn_reset.clicked.connect(self.btn_reset_clicked)
+        #self.btn_new_keypoint.clicked.connect(self.btn_new_keypoint_clicked)
+        #self.btn_keypoint_mark_focused.clicked.connect(self.btn_keypoint_mark_focused_clicked)
+        #self.btn_save_keypoint_miny.clicked.connect(self.btn_save_keypoint_miny_clicked)
+        #self.btn_save_keypoint_maxy.clicked.connect(self.btn_save_keypoint_maxy_clicked)
+        #self.btn_save_keypoint_minz.clicked.connect(self.btn_save_keypoint_minz_clicked)
+        #self.btn_save_keypoint_maxz.clicked.connect(self.btn_save_keypoint_maxz_clicked)
+        #self.btn_new_keypoint_file.clicked.connect(self.btn_new_keypoint_file_clicked)
+        #self.btn_reset.clicked.connect(self.btn_reset_clicked)
 
         self.zoom_slider1.valueChanged.connect(self.zoom_slider1_changed)
-
-
         
+        self.push_kpt_new.clicked.connect(self.push_kpt_new_clicked)
+        self.push_kpt_delete.clicked.connect(self.push_kpt_delete_clicked)
+        self.push_kpt_go.clicked.connect(self.push_kpt_go_clicked)
+        self.push_kpt_set.clicked.connect(self.push_kpt_set_clicked)
+        self.comboBox_keypoints.currentTextChanged.connect(self.comboBox_keypoints_changed)
+
+       
 
 
 
@@ -257,6 +259,83 @@ class MyWindowClass(QtWidgets.QMainWindow, gui.Ui_MainWindow):
 
         '''
 
+
+    def comboBox_keypoints_changed(self, value):
+        if len(value)>0:
+            p = self.dbg_keypoints.points[int(value)]
+            self.label_dk_x.setText(str(p[0]))
+            self.label_dk_y.setText(str(p[1]))
+            self.label_dk_z.setText(str(p[2]))
+            self.label_dk_a.setText(str(p[3]))        
+        
+    def push_kpt_new_clicked(self):
+        nr = self.dbg_keypoints.add_point([self.status.pos_x, self.status.pos_y, self.status.pos_z, self.status.pos_a])
+        #print(nr)
+        
+        if nr == -1:
+            QMessageBox.critical(self, "Add point failed", 'Duplicate X point not allowed!')        
+
+        self.comboBox_keypoints.clear()
+        items = []
+        for i in range(len(self.dbg_keypoints.points)):
+            items.append(str(i))
+        self.comboBox_keypoints.addItems(items)
+
+        if nr > -1:
+            self.comboBox_keypoints.setCurrentIndex(nr)
+        
+    def push_kpt_delete_clicked(self):
+        id = self.comboBox_keypoints.currentText()
+        if len(id)>0:           
+            id = int(id)
+            nr = self.dbg_keypoints.delete_point(id)
+
+            self.comboBox_keypoints.clear()
+            items = []
+            for i in range(len(self.dbg_keypoints.points)):
+                items.append(str(i))
+            self.comboBox_keypoints.addItems(items)
+
+            if nr > -1:
+                self.comboBox_keypoints.setCurrentIndex(nr)
+        
+    def push_kpt_set_clicked(self):
+        id = self.comboBox_keypoints.currentText()
+        if len(id) > 0:
+            id = int(id)
+            nr = self.dbg_keypoints.set_point(id, [self.status.pos_x, self.status.pos_y, self.status.pos_z, self.status.pos_a])
+
+            if nr > -1:
+                self.comboBox_keypoints.setCurrentIndex(nr)
+
+            p = self.dbg_keypoints.points[nr]
+            self.label_dk_x.setText(str(p[0]))
+            self.label_dk_y.setText(str(p[1]))
+            self.label_dk_z.setText(str(p[2]))
+            self.label_dk_a.setText(str(p[3]))        
+
+
+
+    def push_kpt_go_clicked(self):
+        id = self.comboBox_keypoints.currentText()
+        if len(id) > 0:
+            id = int(id)
+            p = self.dbg_keypoints.points[id]
+
+            cmd =  "G90 G1"
+            cmd += " X"
+            cmd += str(p[0])
+            cmd += " Y"
+            cmd += str(p[1])
+            cmd += " Z"
+            cmd += str(p[2])
+            cmd += " A"
+            cmd += str(p[3])
+            cmd += " F"
+            cmd += self.combo_speed.currentText()
+            self.hw.send(cmd+"\n")
+
+    
     def btn_reset_clicked(self):
         # this works
         #self.hw.send_buffered('\x18')
@@ -325,7 +404,8 @@ class MyWindowClass(QtWidgets.QMainWindow, gui.Ui_MainWindow):
                 cmd += " F2000"
                 self.hw.send_buffered(cmd+"\n")
                 
-        
+
+    '''        
     def btn_new_keypoint_file_clicked(self):
         self.kpt = keypoints.Keypoints(self.lens_name)
         self.kpt.save()
@@ -342,10 +422,10 @@ class MyWindowClass(QtWidgets.QMainWindow, gui.Ui_MainWindow):
         #self.btn_save_keypoint_maxy.setEnabled(True)
         #self.btn_save_keypoint_maxz.setEnabled(True)
         #self.btn_save_keypoint_maxa.setEnabled(True)
+    '''
 
-
+    '''
     def btn_new_keypoint_clicked(self):
-        # RRRRRRRRRRRRR
         self.kpt.new_kp()
         self.kpt.save()
 
@@ -376,8 +456,9 @@ class MyWindowClass(QtWidgets.QMainWindow, gui.Ui_MainWindow):
 
         #self.btn_save_keypoint_minx.setStyleSheet("background-color: " + COLOR_GREEN)
         #print(self.btn_keypoint_mark_focused.styleSheet())
+    '''
 
-
+    '''
     def btn_keypoint_mark_focused_clicked(self):
         self.btn_keypoint_mark_focused.setStyleSheet("background-color: " + COLOR_GREEN)
         self.kpt.set_kp_val("x", self.s_global.pos_x)    
@@ -387,7 +468,7 @@ class MyWindowClass(QtWidgets.QMainWindow, gui.Ui_MainWindow):
 
         if self.kpt.validate_point():
             self.btn_new_keypoint.setEnabled(True)
-
+    
     def btn_save_keypoint_miny_clicked(self):
         self.btn_save_keypoint_miny.setStyleSheet("background-color: " + COLOR_GREEN)
         self.kpt.set_kp_val("miny", self.s_global.pos_y)
@@ -419,6 +500,7 @@ class MyWindowClass(QtWidgets.QMainWindow, gui.Ui_MainWindow):
 
         if self.kpt.validate_point():
             self.btn_new_keypoint.setEnabled(True)
+    '''
 
   
     def push_pr1_go_clicked(self):
@@ -918,28 +1000,26 @@ class MyWindowClass(QtWidgets.QMainWindow, gui.Ui_MainWindow):
             lens_detected = False
             if i[0:3] == "LS8":
                 self.lens_name = "L085"
-                self.label_lens_name.setText(self.lens_name)
                 lens_detected = True
 
             if i[0:3] == "6ZG":
                 self.lens_name = "L086"
-                self.label_lens_name.setText(self.lens_name)
                 lens_detected = True
 
             if i[0:3] == "JWF":
                 self.lens_name = "L084"
-                self.label_lens_name.setText(self.lens_name)
                 lens_detected = True
 
             if i[0:3] == "EFJ":
                 self.lens_name = "L117"
-                self.label_lens_name.setText(self.lens_name)
                 lens_detected = True
 
 
             if lens_detected:
+                self.label_lens_name.setText(self.lens_name)
+
                 self.config["last_lens"] = self.lens_name
-                self.btn_new_keypoint_file.setEnabled(True)
+                #self.btn_new_keypoint_file.setEnabled(True)
 
                 cmd = self.config["lens"][self.lens_name]["limit_sensor"]["led_on"]
                 self.hw.send(cmd+"\n")
@@ -956,7 +1036,6 @@ class MyWindowClass(QtWidgets.QMainWindow, gui.Ui_MainWindow):
                     self.combo_step.addItem(i.replace("*", ""))
                 if default_step:
                     self.combo_step.setCurrentText(default_step)
-
 
                 self.group_speed.setEnabled(True)
                 self.group_lens.setEnabled(True)
@@ -1029,8 +1108,6 @@ class MyWindowClass(QtWidgets.QMainWindow, gui.Ui_MainWindow):
                 self.label_pr5_z.setText(preset[2])
                 self.label_pr5_a.setText(preset[3])
 
-
-
                 if self.config["lens"][self.lens_name]["motor"]["function"]["axis_x"]:
                     self.group_x_axis.setEnabled(True)
                     self.group_x_axis.setTitle("X axis / " + self.config["lens"][self.lens_name]["motor"]["function"]["axis_x"])
@@ -1048,7 +1125,16 @@ class MyWindowClass(QtWidgets.QMainWindow, gui.Ui_MainWindow):
                     self.group_a_axis.setTitle("A axis / " + self.config["lens"][self.lens_name]["motor"]["function"]["axis_a"])
 
 
+                # RRRRRRRRRRRRRRRRRR
+                self.dbg_keypoints = keypoints.Keypoints(self.config["lens"][self.lens_name]["debug_keypoints"])
 
+                items = []
+                for i in range(len(self.dbg_keypoints.points)):
+                    items.append(str(i))
+                self.comboBox_keypoints.addItems(items)
+
+
+               
 
                 # ------------------
 
@@ -1353,6 +1439,8 @@ class MyWindowClass(QtWidgets.QMainWindow, gui.Ui_MainWindow):
     def closeEvent(self, event):
         global config
         global running
+
+
 
         if self.s_status.text() == "Connected":
             p1 = self.label_pr1_x.text()+" "+self.label_pr1_y.text()+" "+self.label_pr1_z.text()+" "+self.label_pr1_a.text()

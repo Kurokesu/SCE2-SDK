@@ -28,8 +28,10 @@ class Status():
 class SCE2():
 
     def __init__(self, com_port):
-        self.com_port = com_port
+        self.lens_name = None
+        self.lens_detected = None
 
+        self.com_port = com_port
         self.ser = serial.Serial()
         self.ser.port = self.com_port
         self.ser.baudrate = 115200
@@ -38,7 +40,17 @@ class SCE2():
         self.ser.open()
         self.ser.flushInput()
         self.ser.flushOutput()
-
+      
+        ver = self.send_command("$I", echo=False, expecting_lines=3)
+        txt = ver[0].replace('[', '').replace(']', '')
+        txt_list = txt.split(':')    
+        id_strings = txt_list[2].split(',')
+        for i in id_strings:
+            self.lens_detected = False
+            if i[0:3] == "EFJ":
+                self.lens_name = "L117"
+                #print("L117")
+    
 
     def send_command(self, cmd, echo=True, expecting_lines=1, flush=True):    
         if flush:
@@ -64,6 +76,39 @@ class SCE2():
                     print("< "+data_in)
                 ret.append(data_in)            
             return ret
+
+    def move_buffered(self, cmd):
+        buffers = 0
+
+        backup_timeout = self.ser.timeout
+        self.ser.timeout = 0.01
+        while buffers < 2:
+            retry_cnt = 0
+            ret = ""
+        
+            while True:
+                status = self.send_command("?", echo=False)
+                if len(status) > 10:
+                    if (status[0] == "<") and (status[-1] == ">"):
+                        ret = status
+                        if retry_cnt > 0:
+                            break
+                    retry_cnt+=1
+            #print(ret)
+            text = ret[1:-1]
+            feedback_split = text.split("|")
+            positions = feedback_split[2].split(":")
+            positions = positions[1]
+            positions = positions.split(",")
+            buffers = int(positions[0])
+            #print(buffers)
+        self.ser.timeout = backup_timeout
+
+
+        self.ser.write(bytes(cmd+"\n", 'utf8'))
+        data_in = self.ser.readline().decode('utf-8').strip()
+
+
 
 
     def read_status(self, echo=True):
@@ -94,7 +139,7 @@ class SCE2():
         # Assume string is formed like this (some portions might be missing):
         # <Idle|MPos:0.000,0.000,0.000,0.000|Bf:35,254|F:0|Pn:XYZR|WCO:0.000,0.000,0.000,0.000|Ov:100,100,100|A:S>        
         s = Status()
-        s.timestamp = time.time_ns()            
+        s.timestamp = time.time_ns()
         
         txt = txt.replace('<', '').replace('>', '')
         txt_list = txt.split("|")
@@ -149,7 +194,33 @@ class SCE2():
                     break
         return positions
 
-   
+
+    def home_lens(self, echo=False):
+        if self.lens_name == "L117":
+            if echo:
+                print("Homing L117 lens", end = '')
+            # TODO: check which lens it is. Home each lens according
+            # Workaround for L117. Sometimes if Z is in -4..-2 Y axis can't home
+            if echo:
+                print("...", end = '')
+            self.send_command("G91 G0 Z2", echo=False)
+            self.wait_for_idle(echo=False)
+            if echo:
+                print("A", end = '')
+            self.send_command("$HA", echo=False)
+            if echo:
+                print("X", end = '')
+            self.send_command("$HX", echo=False)
+            if echo:
+                print("Y", end = '')
+            self.send_command("$HY", echo=False)
+            if echo:
+                print("Z", end = '')
+            self.send_command("$HZ", echo=False)
+            if echo:
+                print(" Done")
+
+
 class SCE2_HAL():
     thread = None
     event = Event()
@@ -182,4 +253,3 @@ class SCE2_HAL():
         self.event.clear()
         self.thread = Thread(target=self.task1)
         self.thread.start()
-

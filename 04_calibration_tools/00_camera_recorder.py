@@ -45,7 +45,7 @@ while True:
                 msg = ','.join(file_list)
                 z.send_text("stopped,"+msg)
                 record_status = False
-            
+        
             case "exit":
                 z.send_text("exit")
                 break

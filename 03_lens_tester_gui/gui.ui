@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1116</width>
-    <height>929</height>
+    <width>1020</width>
+    <height>875</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -751,172 +751,159 @@
         </item>
         <item>
          <widget class="QGroupBox" name="group_keypoints_2">
-          <property name="enabled">
-           <bool>false</bool>
-          </property>
           <property name="title">
-           <string>Keypoints for debugging</string>
+           <string>Debug keypoints</string>
           </property>
-          <layout class="QGridLayout" name="gridLayout_22">
-           <item row="4" column="1">
-            <widget class="QPushButton" name="btn_save_keypoint_maxy">
-             <property name="enabled">
-              <bool>false</bool>
-             </property>
-             <property name="minimumSize">
-              <size>
-               <width>0</width>
-               <height>0</height>
-              </size>
-             </property>
+          <layout class="QGridLayout" name="gridLayout_21">
+           <item row="1" column="0">
+            <widget class="QPushButton" name="push_kpt_new">
              <property name="text">
-              <string>Max Y</string>
+              <string>Add new</string>
              </property>
             </widget>
            </item>
-           <item row="4" column="0">
-            <widget class="QPushButton" name="btn_save_keypoint_miny">
-             <property name="enabled">
-              <bool>false</bool>
-             </property>
-             <property name="minimumSize">
-              <size>
-               <width>0</width>
-               <height>0</height>
-              </size>
-             </property>
+           <item row="5" column="0" colspan="2">
+            <widget class="QPushButton" name="push_kpt_set">
              <property name="text">
-              <string>Min Y</string>
+              <string>Set</string>
              </property>
             </widget>
            </item>
-           <item row="5" column="0">
-            <widget class="QPushButton" name="btn_save_keypoint_minz">
-             <property name="enabled">
-              <bool>false</bool>
-             </property>
-             <property name="minimumSize">
-              <size>
-               <width>0</width>
-               <height>0</height>
-              </size>
-             </property>
+           <item row="1" column="1">
+            <widget class="QPushButton" name="push_kpt_delete">
              <property name="text">
-              <string>Min Z</string>
-             </property>
-            </widget>
-           </item>
-           <item row="0" column="0" colspan="2">
-            <widget class="QPushButton" name="btn_new_keypoint_file">
-             <property name="enabled">
-              <bool>false</bool>
-             </property>
-             <property name="minimumSize">
-              <size>
-               <width>0</width>
-               <height>0</height>
-              </size>
-             </property>
-             <property name="text">
-              <string>New keypoint file</string>
-             </property>
-            </widget>
-           </item>
-           <item row="6" column="1">
-            <widget class="QPushButton" name="btn_save_keypoint_maxa">
-             <property name="enabled">
-              <bool>false</bool>
-             </property>
-             <property name="minimumSize">
-              <size>
-               <width>0</width>
-               <height>0</height>
-              </size>
-             </property>
-             <property name="text">
-              <string>Max A</string>
-             </property>
-            </widget>
-           </item>
-           <item row="5" column="1">
-            <widget class="QPushButton" name="btn_save_keypoint_maxz">
-             <property name="enabled">
-              <bool>false</bool>
-             </property>
-             <property name="minimumSize">
-              <size>
-               <width>0</width>
-               <height>0</height>
-              </size>
-             </property>
-             <property name="text">
-              <string>Max Z</string>
-             </property>
-            </widget>
-           </item>
-           <item row="6" column="0">
-            <widget class="QPushButton" name="btn_save_keypoint_mina">
-             <property name="enabled">
-              <bool>false</bool>
-             </property>
-             <property name="minimumSize">
-              <size>
-               <width>0</width>
-               <height>0</height>
-              </size>
-             </property>
-             <property name="text">
-              <string>Min A</string>
-             </property>
-            </widget>
-           </item>
-           <item row="3" column="0" colspan="2">
-            <widget class="QPushButton" name="btn_keypoint_mark_focused">
-             <property name="enabled">
-              <bool>false</bool>
-             </property>
-             <property name="minimumSize">
-              <size>
-               <width>0</width>
-               <height>0</height>
-              </size>
-             </property>
-             <property name="text">
-              <string>Mark as focused</string>
+              <string>Delete</string>
              </property>
             </widget>
            </item>
            <item row="2" column="0" colspan="2">
-            <widget class="QPushButton" name="btn_new_keypoint">
-             <property name="enabled">
-              <bool>false</bool>
-             </property>
-             <property name="minimumSize">
-              <size>
-               <width>0</width>
-               <height>0</height>
-              </size>
-             </property>
+            <widget class="QPushButton" name="push_kpt_go">
              <property name="text">
-              <string>New point</string>
+              <string>Go</string>
              </property>
             </widget>
            </item>
+           <item row="0" column="0" colspan="2">
+            <widget class="QComboBox" name="comboBox_keypoints"/>
+           </item>
+           <item row="3" column="0" colspan="2">
+            <layout class="QHBoxLayout" name="horizontalLayout_58">
+             <item>
+              <layout class="QHBoxLayout" name="horizontalLayout_59">
+               <item>
+                <widget class="QLabel" name="label_36">
+                 <property name="text">
+                  <string>X:</string>
+                 </property>
+                 <property name="alignment">
+                  <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+                 </property>
+                </widget>
+               </item>
+               <item>
+                <widget class="QLabel" name="label_dk_x">
+                 <property name="minimumSize">
+                  <size>
+                   <width>40</width>
+                   <height>0</height>
+                  </size>
+                 </property>
+                 <property name="text">
+                  <string>--</string>
+                 </property>
+                </widget>
+               </item>
+              </layout>
+             </item>
+             <item>
+              <layout class="QHBoxLayout" name="horizontalLayout_60">
+               <item>
+                <widget class="QLabel" name="label_52">
+                 <property name="text">
+                  <string>Y:</string>
+                 </property>
+                 <property name="alignment">
+                  <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+                 </property>
+                </widget>
+               </item>
+               <item>
+                <widget class="QLabel" name="label_dk_y">
+                 <property name="minimumSize">
+                  <size>
+                   <width>40</width>
+                   <height>0</height>
+                  </size>
+                 </property>
+                 <property name="text">
+                  <string>--</string>
+                 </property>
+                </widget>
+               </item>
+              </layout>
+             </item>
+            </layout>
+           </item>
+           <item row="4" column="0" colspan="2">
+            <layout class="QHBoxLayout" name="horizontalLayout_61">
+             <item>
+              <layout class="QHBoxLayout" name="horizontalLayout_62">
+               <item>
+                <widget class="QLabel" name="label_53">
+                 <property name="text">
+                  <string>Z:</string>
+                 </property>
+                 <property name="alignment">
+                  <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+                 </property>
+                </widget>
+               </item>
+               <item>
+                <widget class="QLabel" name="label_dk_z">
+                 <property name="minimumSize">
+                  <size>
+                   <width>40</width>
+                   <height>0</height>
+                  </size>
+                 </property>
+                 <property name="text">
+                  <string>--</string>
+                 </property>
+                </widget>
+               </item>
+              </layout>
+             </item>
+             <item>
+              <layout class="QHBoxLayout" name="horizontalLayout_63">
+               <item>
+                <widget class="QLabel" name="label_54">
+                 <property name="text">
+                  <string>A:</string>
+                 </property>
+                 <property name="alignment">
+                  <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+                 </property>
+                </widget>
+               </item>
+               <item>
+                <widget class="QLabel" name="label_dk_a">
+                 <property name="minimumSize">
+                  <size>
+                   <width>40</width>
+                   <height>0</height>
+                  </size>
+                 </property>
+                 <property name="text">
+                  <string>--</string>
+                 </property>
+                </widget>
+               </item>
+              </layout>
+             </item>
+            </layout>
+           </item>
           </layout>
          </widget>
-        </item>
-        <item>
-         <spacer name="verticalSpacer_9">
-          <property name="orientation">
-           <enum>Qt::Vertical</enum>
-          </property>
-          <property name="sizeHint" stdset="0">
-           <size>
-            <width>20</width>
-            <height>40</height>
-           </size>
-          </property>
-         </spacer>
         </item>
        </layout>
       </item>
@@ -1178,39 +1165,31 @@
          <string>Preset 1</string>
         </property>
         <layout class="QGridLayout" name="gridLayout_6">
-         <item row="6" column="0">
-          <layout class="QHBoxLayout" name="horizontalLayout_38">
-           <item>
-            <widget class="QLabel" name="label_30">
-             <property name="text">
-              <string>Position A:</string>
-             </property>
-             <property name="alignment">
-              <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-             </property>
-            </widget>
-           </item>
-           <item>
-            <widget class="QLabel" name="label_pr1_a">
-             <property name="minimumSize">
-              <size>
-               <width>40</width>
-               <height>0</height>
-              </size>
-             </property>
-             <property name="text">
-              <string>--</string>
-             </property>
-            </widget>
-           </item>
-          </layout>
+         <item row="0" column="0" colspan="2">
+          <widget class="QPushButton" name="push_pr1_go">
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
+             <horstretch>0</horstretch>
+             <verstretch>0</verstretch>
+            </sizepolicy>
+           </property>
+           <property name="font">
+            <font>
+             <weight>75</weight>
+             <bold>true</bold>
+            </font>
+           </property>
+           <property name="text">
+            <string>Go</string>
+           </property>
+          </widget>
          </item>
-         <item row="3" column="0">
+         <item row="1" column="0">
           <layout class="QHBoxLayout" name="horizontalLayout_26">
            <item>
             <widget class="QLabel" name="label_19">
              <property name="text">
-              <string>Position X:</string>
+              <string>X:</string>
              </property>
              <property name="alignment">
               <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
@@ -1232,39 +1211,12 @@
            </item>
           </layout>
          </item>
-         <item row="5" column="0">
-          <layout class="QHBoxLayout" name="horizontalLayout_31">
-           <item>
-            <widget class="QLabel" name="label_29">
-             <property name="text">
-              <string>Position Z:</string>
-             </property>
-             <property name="alignment">
-              <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-             </property>
-            </widget>
-           </item>
-           <item>
-            <widget class="QLabel" name="label_pr1_z">
-             <property name="minimumSize">
-              <size>
-               <width>40</width>
-               <height>0</height>
-              </size>
-             </property>
-             <property name="text">
-              <string>--</string>
-             </property>
-            </widget>
-           </item>
-          </layout>
-         </item>
-         <item row="4" column="0">
+         <item row="1" column="1">
           <layout class="QHBoxLayout" name="horizontalLayout_30">
            <item>
             <widget class="QLabel" name="label_27">
              <property name="text">
-              <string>Position Y:</string>
+              <string>Y:</string>
              </property>
              <property name="alignment">
               <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
@@ -1286,26 +1238,61 @@
            </item>
           </layout>
          </item>
-         <item row="0" column="0">
-          <widget class="QPushButton" name="push_pr1_go">
-           <property name="sizePolicy">
-            <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
-             <horstretch>0</horstretch>
-             <verstretch>0</verstretch>
-            </sizepolicy>
-           </property>
-           <property name="font">
-            <font>
-             <weight>75</weight>
-             <bold>true</bold>
-            </font>
-           </property>
-           <property name="text">
-            <string>Go</string>
-           </property>
-          </widget>
+         <item row="2" column="0">
+          <layout class="QHBoxLayout" name="horizontalLayout_31">
+           <item>
+            <widget class="QLabel" name="label_29">
+             <property name="text">
+              <string>Z:</string>
+             </property>
+             <property name="alignment">
+              <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QLabel" name="label_pr1_z">
+             <property name="minimumSize">
+              <size>
+               <width>40</width>
+               <height>0</height>
+              </size>
+             </property>
+             <property name="text">
+              <string>--</string>
+             </property>
+            </widget>
+           </item>
+          </layout>
          </item>
-         <item row="7" column="0">
+         <item row="2" column="1">
+          <layout class="QHBoxLayout" name="horizontalLayout_38">
+           <item>
+            <widget class="QLabel" name="label_30">
+             <property name="text">
+              <string>A:</string>
+             </property>
+             <property name="alignment">
+              <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QLabel" name="label_pr1_a">
+             <property name="minimumSize">
+              <size>
+               <width>40</width>
+               <height>0</height>
+              </size>
+             </property>
+             <property name="text">
+              <string>--</string>
+             </property>
+            </widget>
+           </item>
+          </layout>
+         </item>
+         <item row="3" column="0" colspan="2">
           <widget class="QPushButton" name="push_pr1_set">
            <property name="text">
             <string>Set</string>
@@ -1324,7 +1311,7 @@
          <string>Preset 2</string>
         </property>
         <layout class="QGridLayout" name="gridLayout_14">
-         <item row="0" column="0">
+         <item row="0" column="0" colspan="2">
           <widget class="QPushButton" name="push_pr2_go">
            <property name="sizePolicy">
             <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
@@ -1343,93 +1330,12 @@
            </property>
           </widget>
          </item>
-         <item row="3" column="0">
-          <layout class="QHBoxLayout" name="horizontalLayout_49">
-           <item>
-            <widget class="QLabel" name="label_44">
-             <property name="text">
-              <string>Position Y:</string>
-             </property>
-             <property name="alignment">
-              <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-             </property>
-            </widget>
-           </item>
-           <item>
-            <widget class="QLabel" name="label_pr2_y">
-             <property name="minimumSize">
-              <size>
-               <width>40</width>
-               <height>0</height>
-              </size>
-             </property>
-             <property name="text">
-              <string>--</string>
-             </property>
-            </widget>
-           </item>
-          </layout>
-         </item>
-         <item row="4" column="0">
-          <layout class="QHBoxLayout" name="horizontalLayout_48">
-           <item>
-            <widget class="QLabel" name="label_43">
-             <property name="text">
-              <string>Position Z:</string>
-             </property>
-             <property name="alignment">
-              <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-             </property>
-            </widget>
-           </item>
-           <item>
-            <widget class="QLabel" name="label_pr2_z">
-             <property name="minimumSize">
-              <size>
-               <width>40</width>
-               <height>0</height>
-              </size>
-             </property>
-             <property name="text">
-              <string>--</string>
-             </property>
-            </widget>
-           </item>
-          </layout>
-         </item>
-         <item row="5" column="0">
-          <layout class="QHBoxLayout" name="horizontalLayout_47">
-           <item>
-            <widget class="QLabel" name="label_38">
-             <property name="text">
-              <string>Position A:</string>
-             </property>
-             <property name="alignment">
-              <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-             </property>
-            </widget>
-           </item>
-           <item>
-            <widget class="QLabel" name="label_pr2_a">
-             <property name="minimumSize">
-              <size>
-               <width>40</width>
-               <height>0</height>
-              </size>
-             </property>
-             <property name="text">
-              <string>--</string>
-             </property>
-            </widget>
-           </item>
-          </layout>
-         </item>
-         <item row="2" column="0">
+         <item row="1" column="0">
           <layout class="QHBoxLayout" name="horizontalLayout_50">
            <item>
             <widget class="QLabel" name="label_25">
              <property name="text">
-              <string>Position X:</string>
+              <string>X:</string>
              </property>
              <property name="alignment">
               <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
@@ -1451,7 +1357,88 @@
            </item>
           </layout>
          </item>
-         <item row="6" column="0">
+         <item row="1" column="1">
+          <layout class="QHBoxLayout" name="horizontalLayout_49">
+           <item>
+            <widget class="QLabel" name="label_44">
+             <property name="text">
+              <string>Y:</string>
+             </property>
+             <property name="alignment">
+              <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QLabel" name="label_pr2_y">
+             <property name="minimumSize">
+              <size>
+               <width>40</width>
+               <height>0</height>
+              </size>
+             </property>
+             <property name="text">
+              <string>--</string>
+             </property>
+            </widget>
+           </item>
+          </layout>
+         </item>
+         <item row="2" column="0">
+          <layout class="QHBoxLayout" name="horizontalLayout_48">
+           <item>
+            <widget class="QLabel" name="label_43">
+             <property name="text">
+              <string>Z:</string>
+             </property>
+             <property name="alignment">
+              <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QLabel" name="label_pr2_z">
+             <property name="minimumSize">
+              <size>
+               <width>40</width>
+               <height>0</height>
+              </size>
+             </property>
+             <property name="text">
+              <string>--</string>
+             </property>
+            </widget>
+           </item>
+          </layout>
+         </item>
+         <item row="2" column="1">
+          <layout class="QHBoxLayout" name="horizontalLayout_47">
+           <item>
+            <widget class="QLabel" name="label_38">
+             <property name="text">
+              <string>A:</string>
+             </property>
+             <property name="alignment">
+              <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QLabel" name="label_pr2_a">
+             <property name="minimumSize">
+              <size>
+               <width>40</width>
+               <height>0</height>
+              </size>
+             </property>
+             <property name="text">
+              <string>--</string>
+             </property>
+            </widget>
+           </item>
+          </layout>
+         </item>
+         <item row="3" column="0" colspan="2">
           <widget class="QPushButton" name="push_pr2_set">
            <property name="text">
             <string>Set</string>
@@ -1470,7 +1457,7 @@
          <string>Preset 3</string>
         </property>
         <layout class="QGridLayout" name="gridLayout_15">
-         <item row="0" column="0">
+         <item row="0" column="0" colspan="2">
           <widget class="QPushButton" name="push_pr3_go">
            <property name="sizePolicy">
             <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
@@ -1489,12 +1476,12 @@
            </property>
           </widget>
          </item>
-         <item row="5" column="0">
-          <layout class="QHBoxLayout" name="horizontalLayout_34">
+         <item row="1" column="0">
+          <layout class="QHBoxLayout" name="horizontalLayout_28">
            <item>
-            <widget class="QLabel" name="label_35">
+            <widget class="QLabel" name="label_21">
              <property name="text">
-              <string>Position A:</string>
+              <string>X:</string>
              </property>
              <property name="alignment">
               <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
@@ -1502,7 +1489,7 @@
             </widget>
            </item>
            <item>
-            <widget class="QLabel" name="label_pr3_a">
+            <widget class="QLabel" name="label_pr3_x">
              <property name="minimumSize">
               <size>
                <width>40</width>
@@ -1516,39 +1503,12 @@
            </item>
           </layout>
          </item>
-         <item row="4" column="0">
-          <layout class="QHBoxLayout" name="horizontalLayout_35">
-           <item>
-            <widget class="QLabel" name="label_37">
-             <property name="text">
-              <string>Position Z:</string>
-             </property>
-             <property name="alignment">
-              <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-             </property>
-            </widget>
-           </item>
-           <item>
-            <widget class="QLabel" name="label_pr3_z">
-             <property name="minimumSize">
-              <size>
-               <width>40</width>
-               <height>0</height>
-              </size>
-             </property>
-             <property name="text">
-              <string>--</string>
-             </property>
-            </widget>
-           </item>
-          </layout>
-         </item>
-         <item row="3" column="0">
+         <item row="1" column="1">
           <layout class="QHBoxLayout" name="horizontalLayout_51">
            <item>
             <widget class="QLabel" name="label_45">
              <property name="text">
-              <string>Position Y:</string>
+              <string>Y:</string>
              </property>
              <property name="alignment">
               <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
@@ -1571,11 +1531,11 @@
           </layout>
          </item>
          <item row="2" column="0">
-          <layout class="QHBoxLayout" name="horizontalLayout_28">
+          <layout class="QHBoxLayout" name="horizontalLayout_35">
            <item>
-            <widget class="QLabel" name="label_21">
+            <widget class="QLabel" name="label_37">
              <property name="text">
-              <string>Position X:</string>
+              <string>Z:</string>
              </property>
              <property name="alignment">
               <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
@@ -1583,7 +1543,7 @@
             </widget>
            </item>
            <item>
-            <widget class="QLabel" name="label_pr3_x">
+            <widget class="QLabel" name="label_pr3_z">
              <property name="minimumSize">
               <size>
                <width>40</width>
@@ -1597,7 +1557,34 @@
            </item>
           </layout>
          </item>
-         <item row="6" column="0">
+         <item row="2" column="1">
+          <layout class="QHBoxLayout" name="horizontalLayout_34">
+           <item>
+            <widget class="QLabel" name="label_35">
+             <property name="text">
+              <string>A:</string>
+             </property>
+             <property name="alignment">
+              <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QLabel" name="label_pr3_a">
+             <property name="minimumSize">
+              <size>
+               <width>40</width>
+               <height>0</height>
+              </size>
+             </property>
+             <property name="text">
+              <string>--</string>
+             </property>
+            </widget>
+           </item>
+          </layout>
+         </item>
+         <item row="3" column="0" colspan="2">
           <widget class="QPushButton" name="push_pr3_set">
            <property name="text">
             <string>Set</string>
@@ -1616,7 +1603,7 @@
          <string>Preset 4</string>
         </property>
         <layout class="QGridLayout" name="gridLayout_13">
-         <item row="0" column="0">
+         <item row="0" column="0" colspan="2">
           <widget class="QPushButton" name="push_pr4_go">
            <property name="sizePolicy">
             <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
@@ -1635,12 +1622,12 @@
            </property>
           </widget>
          </item>
-         <item row="5" column="0">
-          <layout class="QHBoxLayout" name="horizontalLayout_36">
+         <item row="1" column="0">
+          <layout class="QHBoxLayout" name="horizontalLayout_29">
            <item>
-            <widget class="QLabel" name="label_39">
+            <widget class="QLabel" name="label_22">
              <property name="text">
-              <string>Position A:</string>
+              <string>X:</string>
              </property>
              <property name="alignment">
               <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
@@ -1648,7 +1635,7 @@
             </widget>
            </item>
            <item>
-            <widget class="QLabel" name="label_pr4_a">
+            <widget class="QLabel" name="label_pr4_x">
              <property name="minimumSize">
               <size>
                <width>40</width>
@@ -1662,39 +1649,12 @@
            </item>
           </layout>
          </item>
-         <item row="4" column="0">
-          <layout class="QHBoxLayout" name="horizontalLayout_37">
-           <item>
-            <widget class="QLabel" name="label_41">
-             <property name="text">
-              <string>Position Z:</string>
-             </property>
-             <property name="alignment">
-              <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-             </property>
-            </widget>
-           </item>
-           <item>
-            <widget class="QLabel" name="label_pr4_z">
-             <property name="minimumSize">
-              <size>
-               <width>40</width>
-               <height>0</height>
-              </size>
-             </property>
-             <property name="text">
-              <string>--</string>
-             </property>
-            </widget>
-           </item>
-          </layout>
-         </item>
-         <item row="3" column="0">
+         <item row="1" column="1">
           <layout class="QHBoxLayout" name="horizontalLayout_52">
            <item>
             <widget class="QLabel" name="label_46">
              <property name="text">
-              <string>Position Y:</string>
+              <string>Y:</string>
              </property>
              <property name="alignment">
               <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
@@ -1717,11 +1677,11 @@
           </layout>
          </item>
          <item row="2" column="0">
-          <layout class="QHBoxLayout" name="horizontalLayout_29">
+          <layout class="QHBoxLayout" name="horizontalLayout_37">
            <item>
-            <widget class="QLabel" name="label_22">
+            <widget class="QLabel" name="label_41">
              <property name="text">
-              <string>Position X:</string>
+              <string>Z:</string>
              </property>
              <property name="alignment">
               <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
@@ -1729,7 +1689,7 @@
             </widget>
            </item>
            <item>
-            <widget class="QLabel" name="label_pr4_x">
+            <widget class="QLabel" name="label_pr4_z">
              <property name="minimumSize">
               <size>
                <width>40</width>
@@ -1743,7 +1703,34 @@
            </item>
           </layout>
          </item>
-         <item row="6" column="0">
+         <item row="2" column="1">
+          <layout class="QHBoxLayout" name="horizontalLayout_36">
+           <item>
+            <widget class="QLabel" name="label_39">
+             <property name="text">
+              <string>A:</string>
+             </property>
+             <property name="alignment">
+              <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QLabel" name="label_pr4_a">
+             <property name="minimumSize">
+              <size>
+               <width>40</width>
+               <height>0</height>
+              </size>
+             </property>
+             <property name="text">
+              <string>--</string>
+             </property>
+            </widget>
+           </item>
+          </layout>
+         </item>
+         <item row="3" column="0" colspan="2">
           <widget class="QPushButton" name="push_pr4_set">
            <property name="text">
             <string>Set</string>
@@ -1762,7 +1749,7 @@
          <string>Preset 5</string>
         </property>
         <layout class="QGridLayout" name="gridLayout_16">
-         <item row="0" column="0">
+         <item row="0" column="0" colspan="2">
           <widget class="QPushButton" name="push_pr5_go">
            <property name="sizePolicy">
             <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
@@ -1781,93 +1768,12 @@
            </property>
           </widget>
          </item>
-         <item row="4" column="0">
-          <layout class="QHBoxLayout" name="horizontalLayout_42">
-           <item>
-            <widget class="QLabel" name="label_42">
-             <property name="text">
-              <string>Position Z:</string>
-             </property>
-             <property name="alignment">
-              <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-             </property>
-            </widget>
-           </item>
-           <item>
-            <widget class="QLabel" name="label_pr5_z">
-             <property name="minimumSize">
-              <size>
-               <width>40</width>
-               <height>0</height>
-              </size>
-             </property>
-             <property name="text">
-              <string>--</string>
-             </property>
-            </widget>
-           </item>
-          </layout>
-         </item>
-         <item row="3" column="0">
-          <layout class="QHBoxLayout" name="horizontalLayout_43">
-           <item>
-            <widget class="QLabel" name="label_47">
-             <property name="text">
-              <string>Position Y:</string>
-             </property>
-             <property name="alignment">
-              <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-             </property>
-            </widget>
-           </item>
-           <item>
-            <widget class="QLabel" name="label_pr5_y">
-             <property name="minimumSize">
-              <size>
-               <width>40</width>
-               <height>0</height>
-              </size>
-             </property>
-             <property name="text">
-              <string>--</string>
-             </property>
-            </widget>
-           </item>
-          </layout>
-         </item>
-         <item row="5" column="0">
-          <layout class="QHBoxLayout" name="horizontalLayout_41">
-           <item>
-            <widget class="QLabel" name="label_40">
-             <property name="text">
-              <string>Position A:</string>
-             </property>
-             <property name="alignment">
-              <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-             </property>
-            </widget>
-           </item>
-           <item>
-            <widget class="QLabel" name="label_pr5_a">
-             <property name="minimumSize">
-              <size>
-               <width>40</width>
-               <height>0</height>
-              </size>
-             </property>
-             <property name="text">
-              <string>--</string>
-             </property>
-            </widget>
-           </item>
-          </layout>
-         </item>
-         <item row="2" column="0">
+         <item row="1" column="0">
           <layout class="QHBoxLayout" name="horizontalLayout_53">
            <item>
             <widget class="QLabel" name="label_23">
              <property name="text">
-              <string>Position X:</string>
+              <string>X:</string>
              </property>
              <property name="alignment">
               <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
@@ -1889,7 +1795,88 @@
            </item>
           </layout>
          </item>
-         <item row="6" column="0">
+         <item row="1" column="1">
+          <layout class="QHBoxLayout" name="horizontalLayout_43">
+           <item>
+            <widget class="QLabel" name="label_47">
+             <property name="text">
+              <string>Y:</string>
+             </property>
+             <property name="alignment">
+              <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QLabel" name="label_pr5_y">
+             <property name="minimumSize">
+              <size>
+               <width>40</width>
+               <height>0</height>
+              </size>
+             </property>
+             <property name="text">
+              <string>--</string>
+             </property>
+            </widget>
+           </item>
+          </layout>
+         </item>
+         <item row="2" column="0">
+          <layout class="QHBoxLayout" name="horizontalLayout_42">
+           <item>
+            <widget class="QLabel" name="label_42">
+             <property name="text">
+              <string>Z:</string>
+             </property>
+             <property name="alignment">
+              <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QLabel" name="label_pr5_z">
+             <property name="minimumSize">
+              <size>
+               <width>40</width>
+               <height>0</height>
+              </size>
+             </property>
+             <property name="text">
+              <string>--</string>
+             </property>
+            </widget>
+           </item>
+          </layout>
+         </item>
+         <item row="2" column="1">
+          <layout class="QHBoxLayout" name="horizontalLayout_41">
+           <item>
+            <widget class="QLabel" name="label_40">
+             <property name="text">
+              <string>A:</string>
+             </property>
+             <property name="alignment">
+              <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QLabel" name="label_pr5_a">
+             <property name="minimumSize">
+              <size>
+               <width>40</width>
+               <height>0</height>
+              </size>
+             </property>
+             <property name="text">
+              <string>--</string>
+             </property>
+            </widget>
+           </item>
+          </layout>
+         </item>
+         <item row="3" column="0" colspan="2">
           <widget class="QPushButton" name="push_pr5_set">
            <property name="text">
             <string>Set</string>
@@ -1898,19 +1885,6 @@
          </item>
         </layout>
        </widget>
-      </item>
-      <item>
-       <spacer name="horizontalSpacer">
-        <property name="orientation">
-         <enum>Qt::Horizontal</enum>
-        </property>
-        <property name="sizeHint" stdset="0">
-         <size>
-          <width>40</width>
-          <height>20</height>
-         </size>
-        </property>
-       </spacer>
       </item>
      </layout>
     </item>
@@ -2111,7 +2085,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>1116</width>
+     <width>1020</width>
      <height>21</height>
     </rect>
    </property>

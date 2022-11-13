@@ -3,17 +3,17 @@ import cv2
 from tqdm import tqdm
 
 results = None
-print("Loading yaml file")
+print("Loading data file... ", end = '')
 config_file = "results\\results.yaml"
 with open(config_file) as f:
     results = yaml.load(f, Loader=yaml.FullLoader)
     f.close()
+print("OK")  
+print()  
 
-
-print("Processing files")
-for kp in tqdm(results["kp"], position=0):
+for kp in tqdm(results["kp"], position=0, desc="Keypoint"):
     picture_list = results["kp"][kp]["pic"]
-    for p in tqdm(range(len(picture_list)), position=1, leave=False):
+    for p in tqdm(range(len(picture_list)), position=1, leave=False, desc="Frame"):
         filename = "results\\"+str(picture_list[p]["name"])+".jpg"
         #print(picture_list[p])
         #print(filename)
@@ -26,5 +26,7 @@ for kp in tqdm(results["kp"], position=0):
         # TODO: show roi and value
         #print(fm)
 
+print("Saving data file... ", end = '')
 with open(config_file, 'w') as f:
     yaml.dump(results, f)
+print("Done")    

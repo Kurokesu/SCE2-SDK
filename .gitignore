@@ -1,8 +1,7 @@
-*.bat
-out
+update.bat
 __pycache__
 *.pyc
 *.log
 *.lnk
-other
-04_tools
+
+
