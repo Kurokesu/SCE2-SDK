@@ -11,6 +11,7 @@ with open(config_file) as f:
 print("OK")  
 print()  
 
+
 for kp in tqdm(results["kp"], position=0, desc="Keypoint"):
     picture_list = results["kp"][kp]["pic"]
     for p in tqdm(range(len(picture_list)), position=1, leave=False, desc="Frame"):
