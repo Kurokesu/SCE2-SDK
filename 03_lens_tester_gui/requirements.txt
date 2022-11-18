@@ -1,3 +1,4 @@
+tqdm
 pyyaml
 pyqt5
 numpy
