@@ -1,4 +1,4 @@
-boot_count: 853
+boot_count: 877
 clean_exit: true
 com_baud: 115200
 com_timeout: 5
@@ -47,6 +47,7 @@ lens:
           color: '#0000FF'
           name: Focus infinity
           pulloff: 0
+          visible: True
           x:
           - 34.92
           - 31.92
@@ -242,6 +243,7 @@ lens:
           color: '#0000FF'
           name: Focus infinity
           pulloff: 0
+          visible: True
           x: &id001
           - 12.33
           - 9.93
@@ -413,6 +415,7 @@ lens:
           color: '#0000FF'
           name: Focus infinity
           pulloff: 0
+          visible: True
           x: &id002
           - 44.92
           - 43.42
@@ -503,16 +506,16 @@ lens:
       speed_list: 2000 1500 *1000 500 200 100 50 10
       step_list: 0.01 0.05 *0.1 0.5 1.0 5.0
     preset:
-      p1: 44.92 -1.65 -2.14 0.0
-      p2: 30.8 1.07 2.73 0.0
-      p3: 14.8 -1.73 5.53 0.0
-      p4: 4.6 -5.73 5.39 0.0
-      p5: -4.2 5.1 5.69 0.0
+      p1: 44.92 -1.77 -2.14 0.0
+      p2: 30.8 0.91 2.73 0.0
+      p3: 14.8 -1.86 5.53 0.0
+      p4: 4.6 -5.91 5.39 0.0
+      p5: -4.2 4.91 5.69 0.0
     specs:
       focal_length_max: 252
       focal_length_min: 6.3
       image_circle: 9.2
       lpm: 250
 logging_level: DEBUG
-port: COM169
+port: COM233
 remember_last_com_port: true
