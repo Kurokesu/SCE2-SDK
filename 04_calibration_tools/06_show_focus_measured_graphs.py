@@ -38,9 +38,12 @@ for kp in tqdm(results["kp"], position=0):
     best_pic = None
     highest_sharpness = 0
     for p in range(len(picture_list)):
-        if picture_list[p]["sharpness"] > highest_sharpness:
-            best_pic = p
-            highest_sharpness = picture_list[p]["sharpness"]
+        try:
+            if picture_list[p]["sharpness"] > highest_sharpness:
+                best_pic = p
+                highest_sharpness = picture_list[p]["sharpness"]
+        except:
+            pass
 
     ts_gap = 9999999999999999999999
     best_motor = None
@@ -53,6 +56,7 @@ for kp in tqdm(results["kp"], position=0):
             ts_gap = ts_abs_gap
             best_motor = p
 
+    
     #ax.scatter(motor_list[best_motor]['x'], motor_list[best_motor]['y'], c ="red", alpha = 0.9, s = 20, marker ="x")
     ax.scatter(motor_list[best_motor]['x']+picture_list[best_pic]["sharpness"]*scale_sharpness, motor_list[best_motor]['y'], c ="red", alpha = 0.9, s = 20, marker ="x")
     ax.plot([motor_list[best_motor]['x'], motor_list[best_motor]['x']+picture_list[best_pic]["sharpness"]*scale_sharpness], [motor_list[best_motor]['y'], motor_list[best_motor]['y']], c ="red", alpha = 0.4, linewidth=0.8)  

@@ -129,7 +129,7 @@ for kp in tqdm(keypoints["kp"], desc="Capturing frames"):
     '''
 
 
-reply, status, t = z.msg_text("hide")
+#reply, status, t = z.msg_text("hide")
 
 print("Saving data file... ", end = '')
 with open("results\\results.yaml", 'w') as f:

@@ -9,9 +9,9 @@ use_roi = True
 
 roi_tele = {}
 roi_tele["x0"] = 650
-roi_tele["y0"] = 270
+roi_tele["y0"] = 370
 roi_tele["x1"] = 1450
-roi_tele["y1"] = 850
+roi_tele["y1"] = 950
 
 roi_wide = {}
 roi_wide["x0"] = 890
@@ -32,6 +32,14 @@ def find_x_point(xa, xb, ya, yb, yc):
     return xc
 
 
+keypoints = None
+print("Loading keypoint file... ", end = '')
+kp_file = "results\\keypoints.yaml"
+with open(kp_file) as f:
+    keypoints = yaml.load(f, Loader=yaml.FullLoader)
+    f.close()
+print("OK")  
+
 results = None
 print("Loading data file... ", end = '')
 config_file = "results\\results.yaml"
@@ -43,6 +51,7 @@ print()
 
 
 # find min/max of the lens x axis
+'''
 motor_x_pos_min = 9999999
 motor_x_pos_max = -9999999
 for kp in tqdm(results["kp"], position=0, desc="Keypoint"):
@@ -53,13 +62,18 @@ for kp in tqdm(results["kp"], position=0, desc="Keypoint"):
             motor_x_pos_max = motor_x_pos
         if motor_x_pos < motor_x_pos_min:
             motor_x_pos_min = motor_x_pos
+'''
+
+motor_x_pos_min = keypoints["kp"][0]["x"]
+motor_x_pos_max = keypoints["kp"][len(keypoints["kp"])-1]["x"]
 
 
 for kp in tqdm(results["kp"], position=0, desc="Keypoint"):
     picture_list = results["kp"][kp]["pic"]
 
     for p in tqdm(range(len(picture_list)), position=1, leave=False, desc="Frame"):
-        motor_x_pos = results["kp"][kp]["pos"][p]["x"]
+        kp_ = keypoints["kp"][kp]
+        motor_x_pos = kp_["x"]
         filename = "results\\"+str(picture_list[p]["name"])+".jpg"
 
         img = cv2.imread(filename, cv2.IMREAD_COLOR)

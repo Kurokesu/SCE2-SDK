@@ -18,6 +18,7 @@ import motion
 import gui
 from scipy.interpolate import interp1d
 import keypoints
+import time
 
 import logging
 LOGGER = logging.getLogger(__name__)
@@ -89,7 +90,9 @@ class MyWindowClass(QtWidgets.QMainWindow, gui.Ui_MainWindow):
         self.status = Status()
         self.lens_name = None
         self.zoom_slider_memory = 0
+        self.focus_slider_memory = 50
         self.dbg_keypoints = None
+        self.last_updated_pos = 0
 
         s_global = Status()
 
@@ -121,6 +124,7 @@ class MyWindowClass(QtWidgets.QMainWindow, gui.Ui_MainWindow):
         self.group_homing.setEnabled(False)
         self.group_keypoints_2.setEnabled(False)
         self.group_guided_zoom1.setEnabled(False)
+        self.group_guided_focus1.setEnabled(False)
         self.group_x_axis.setEnabled(False)
         self.group_y_axis.setEnabled(False)
         self.group_z_axis.setEnabled(False)
@@ -201,6 +205,7 @@ class MyWindowClass(QtWidgets.QMainWindow, gui.Ui_MainWindow):
         #self.btn_reset.clicked.connect(self.btn_reset_clicked)
 
         self.zoom_slider1.valueChanged.connect(self.zoom_slider1_changed)
+        self.focus_slider1.valueChanged.connect(self.focus_slider1_changed)
         
         self.push_kpt_new.clicked.connect(self.push_kpt_new_clicked)
         self.push_kpt_delete.clicked.connect(self.push_kpt_delete_clicked)
@@ -208,8 +213,10 @@ class MyWindowClass(QtWidgets.QMainWindow, gui.Ui_MainWindow):
         self.push_kpt_set.clicked.connect(self.push_kpt_set_clicked)
         self.comboBox_keypoints.currentTextChanged.connect(self.comboBox_keypoints_changed)
 
-       
 
+        self.timer=QTimer()
+        self.timer.timeout.connect(self.check_motor_pos)
+        #self.timer.start(1000)
 
 
         '''
@@ -354,9 +361,38 @@ class MyWindowClass(QtWidgets.QMainWindow, gui.Ui_MainWindow):
         pass
 
 
-    def zoom_slider1_changed(self):
-        interpolate_count = self.config["lens"][self.lens_name]["motor"]["interpolate_count"]
 
+    def focus_slider1_changed(self, value):
+        interpolate_count = self.config["lens"][self.lens_name]["motor"]["interpolate_count"]
+        curve_focus_inf = self.config["lens"][self.lens_name]["motor"]["curves"]["focus_inf"]
+        curve_focus_near = self.config["lens"][self.lens_name]["motor"]["curves"]["focus_near"]
+
+        f1 = interp1d(curve_focus_inf["x"], curve_focus_inf["y"], kind='cubic')
+        f3 = interp1d(curve_focus_near["x"], curve_focus_near["y"], kind='cubic')
+
+        x_pos = float(self.label_x_pos.text())
+        new_focus_pos = f1(x_pos)+(f3(x_pos)-f1(x_pos))*value/100
+        if self.lens_name == "L084":
+            cmd = "G90 G1"
+            cmd += " Y"+str(new_focus_pos)
+            cmd += " F2000"
+            self.hw.send_buffered(cmd+"\n")
+
+        if self.lens_name == "L117":
+            cmd = "G90 G1"
+            cmd += " Z"+str(new_focus_pos)
+            cmd += " F2000"
+            self.hw.send_buffered(cmd+"\n")
+        
+        if self.lens_name == "L086":
+            cmd = "G90 G1"
+            cmd += " Z"+str(new_focus_pos)
+            cmd += " F2000"
+            self.hw.send_buffered(cmd+"\n")
+
+
+    def zoom_slider1_changed(self, value):
+        interpolate_count = self.config["lens"][self.lens_name]["motor"]["interpolate_count"]
         curve_focus_inf = self.config["lens"][self.lens_name]["motor"]["curves"]["focus_inf"]
         curve_zoom_correction = self.config["lens"][self.lens_name]["motor"]["curves"]["zoom_correction"]
 
@@ -371,7 +407,8 @@ class MyWindowClass(QtWidgets.QMainWindow, gui.Ui_MainWindow):
 
         normalized100 = interp1d((0, 100), (i_max, i_min))
         pos_from = self.zoom_slider_memory
-        pos_to = self.sender().value()
+        #pos_to = self.sender().value()
+        pos_to = value
         diff = np.abs(pos_from-pos_to)
         resolution = 0.5
         self.zoom_slider_memory = pos_to # backup last value
@@ -950,9 +987,12 @@ class MyWindowClass(QtWidgets.QMainWindow, gui.Ui_MainWindow):
             self.hw.action_recipe.put("status1")
             self.hw.action_recipe.put("version")
             self.hw.action_recipe.put("get_param_list")
+            self.timer.start(100)
+            
             
         if text == "Disconnected":
             self.hw_connected = False
+            self.timer.stop()
 
         self.update_enabled_elements()
 
@@ -1076,6 +1116,7 @@ class MyWindowClass(QtWidgets.QMainWindow, gui.Ui_MainWindow):
                 self.group_p5.setEnabled(True)
                 self.group_homing.setEnabled(True)
                 self.group_guided_zoom1.setEnabled(True)
+                self.group_guided_focus1.setEnabled(True)
                 self.group_keypoints_2.setEnabled(True)
 
                 preset = self.config["lens"][self.lens_name]["preset"]["p1"].split(" ")
@@ -1192,10 +1233,18 @@ class MyWindowClass(QtWidgets.QMainWindow, gui.Ui_MainWindow):
                  
                 #plt = pg.plot()
  
-
                 
     def add_log_response(self, text):
         self.label_response.setText(text.strip())
+
+    def check_motor_pos(self):
+        now = time.time()
+        if str(self.label_motion_status.text()) == "Run":
+            if(now - self.last_updated_pos) > 0.3:
+                print("update pos")
+                self.hw.send_buffered('?')           
+            #self.last_updated_pos = now
+
 
     def serFeedback(self, text):
         txt = text.replace('<', '').replace('>', '')
@@ -1290,6 +1339,20 @@ class MyWindowClass(QtWidgets.QMainWindow, gui.Ui_MainWindow):
         self.label_motion_status.setText(str(s.status))
         self.s_global = s
 
+        self.last_updated_pos = time.time()
+
+        '''
+        if str(s.status) == "Run":
+            now = time.time()
+            print(now - self.last_updated_pos)
+            if (now - self.last_updated_pos) > 0.5:
+                #time.sleep(0.5)
+                # TODO: add watchdog
+                print(s.status)
+                self.hw.send_buffered('?')
+           
+            self.last_updated_pos = now
+        '''
 
         '''
         if len(text) < 5:

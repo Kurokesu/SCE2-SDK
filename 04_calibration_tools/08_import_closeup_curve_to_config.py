@@ -53,11 +53,11 @@ for kp in results["kp"]:
     z_data.append(motor_list[best_motor]['z'])
 
 
-config["lens"][lens]["motor"]["curves"]["focus_inf"]["x"] = x_data
-config["lens"][lens]["motor"]["curves"]["focus_inf"]["y"] = y_data # was z_data
+config["lens"][lens]["motor"]["curves"]["focus_near"]["x"] = x_data
+config["lens"][lens]["motor"]["curves"]["focus_near"]["y"] = y_data
 
 config["lens"][lens]["motor"]["curves"]["zoom_correction"]["x"] = x_data
-config["lens"][lens]["motor"]["curves"]["zoom_correction"]["y"] = z_data # was y_data
+config["lens"][lens]["motor"]["curves"]["zoom_correction"]["y"] = z_data
 
 with open(cfg_file, 'w') as f:
     yaml.dump(config, f)
