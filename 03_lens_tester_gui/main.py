@@ -144,6 +144,7 @@ class MyWindowClass(QtWidgets.QMainWindow, gui.Ui_MainWindow):
         self.group_z_axis.setEnabled(False)
         self.group_a_axis.setEnabled(False)
         self.presetGroup.setEnabled(False)
+        self.focus_slider1.setEnabled(True) # should be enabled in edittor, but there is a bug. workaround
         #self.group_p2.setEnabled(False)
         #self.group_p3.setEnabled(False)
         #self.group_p4.setEnabled(False)
@@ -597,8 +598,6 @@ class MyWindowClass(QtWidgets.QMainWindow, gui.Ui_MainWindow):
         cmd += str(self.combo_speed.currentText())
         self.hw.send(cmd+"\n")
 
-
-
     def btn_f1_on_clicked(self):
         cmd = self.config["lens"][self.lens_name]["filter1"]["state_on"]
 
@@ -639,7 +638,6 @@ class MyWindowClass(QtWidgets.QMainWindow, gui.Ui_MainWindow):
             for c in cmd:
                 self.hw.send(c+"\n")
 
-
     def btn_pi_led_on_clicked(self):
         cmd = self.config["lens"][self.lens_name]["limit_sensor"]["led_on"]
         self.hw.send(cmd+"\n")
@@ -652,14 +650,9 @@ class MyWindowClass(QtWidgets.QMainWindow, gui.Ui_MainWindow):
         cmd = self.config["lens"][self.lens_name]["iris"]["open"]
         self.hw.send(cmd+"\n")
        
-
     def btn_iris_off_clicked(self):
         cmd = self.config["lens"][self.lens_name]["iris"]["close"]
         self.hw.send(cmd+"\n")
-
-        
-
-
 
     def btn_mdi_send_clicked(self):
         self.hw.send(self.line_mdi.text()+"\n")
@@ -906,7 +899,7 @@ class MyWindowClass(QtWidgets.QMainWindow, gui.Ui_MainWindow):
         now = time.time()
         if str(self.label_motion_status.text()) == "Run":
             if(now - self.last_updated_pos) > 0.3:
-                print("update pos")
+                #print("update pos")
                 self.hw.send_buffered('?')           
             #self.last_updated_pos = now
 
