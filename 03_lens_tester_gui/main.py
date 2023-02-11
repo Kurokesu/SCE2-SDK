@@ -16,6 +16,7 @@ import queue
 import utils
 import motion
 import gui
+import preset_widget
 from scipy.interpolate import interp1d
 import keypoints
 import time
@@ -48,7 +49,21 @@ def approximate_spline(data_x, data_y, point_count):
         y_values.append(i[1])
 
     return((x_values, y_values))
-   
+
+
+def split_preset_values(str_values, value_count=4):
+    # TODO: change data format
+    #val_cnt = 6
+    values = [0]*value_count
+
+    v = str_values.split(" ")
+    for i in range(value_count):
+        try:
+            values[i] = float(v[i])
+        except:
+            values[i] = None
+
+    return values
 
 
 class Status():
@@ -129,11 +144,11 @@ class MyWindowClass(QtWidgets.QMainWindow, gui.Ui_MainWindow):
         self.group_y_axis.setEnabled(False)
         self.group_z_axis.setEnabled(False)
         self.group_a_axis.setEnabled(False)
-        self.group_p1.setEnabled(False)
-        self.group_p2.setEnabled(False)
-        self.group_p3.setEnabled(False)
-        self.group_p4.setEnabled(False)
-        self.group_p5.setEnabled(False)
+        self.presetGroup.setEnabled(False)
+        #self.group_p2.setEnabled(False)
+        #self.group_p3.setEnabled(False)
+        #self.group_p4.setEnabled(False)
+        #self.group_p5.setEnabled(False)
 
 
         # Com port
@@ -182,18 +197,6 @@ class MyWindowClass(QtWidgets.QMainWindow, gui.Ui_MainWindow):
         self.btn_z_seek.clicked.connect(self.btn_z_seek_clicked)
         self.btn_a_seek.clicked.connect(self.btn_a_seek_clicked)
         self.btn_all_seek.clicked.connect(self.btn_all_seek_clicked)
-
-        self.push_pr1_set.clicked.connect(self.push_pr1_set_clicked)
-        self.push_pr2_set.clicked.connect(self.push_pr2_set_clicked)
-        self.push_pr3_set.clicked.connect(self.push_pr3_set_clicked)
-        self.push_pr4_set.clicked.connect(self.push_pr4_set_clicked)
-        self.push_pr5_set.clicked.connect(self.push_pr5_set_clicked)
-
-        self.push_pr1_go.clicked.connect(self.push_pr1_go_clicked)
-        self.push_pr2_go.clicked.connect(self.push_pr2_go_clicked)
-        self.push_pr3_go.clicked.connect(self.push_pr3_go_clicked)
-        self.push_pr4_go.clicked.connect(self.push_pr4_go_clicked)
-        self.push_pr5_go.clicked.connect(self.push_pr5_go_clicked)
         
         #self.btn_new_keypoint.clicked.connect(self.btn_new_keypoint_clicked)
         #self.btn_keypoint_mark_focused.clicked.connect(self.btn_keypoint_mark_focused_clicked)
@@ -217,6 +220,18 @@ class MyWindowClass(QtWidgets.QMainWindow, gui.Ui_MainWindow):
         self.timer=QTimer()
         self.timer.timeout.connect(self.check_motor_pos)
         #self.timer.start(1000)
+
+        self.presetGroup.hide()
+        #layout.removeWidget(self.widget_name)
+        #self.widget_name.deleteLater()
+        #self.widget_name = None
+
+
+        #self.presets = preset_widget.Preset(self.presetGroup, 5)
+        self.presets = preset_widget.Preset(self.horizontalLayout, 5)
+        self.presets.clicked_set.connect(self.preset_set)
+        self.presets.clicked_go.connect(self.preset_go)
+
 
 
         '''
@@ -266,7 +281,30 @@ class MyWindowClass(QtWidgets.QMainWindow, gui.Ui_MainWindow):
 
         '''
 
+    def preset_go(self, nr, values):
+        #print("Widget GO", nr, values)
+        cmd =  "G90 G1"
+        if self.config["lens"][self.lens_name]["motor"]["function"]["axis_x"]:
+            cmd += " X"
+            cmd += str(values[0])
+        if self.config["lens"][self.lens_name]["motor"]["function"]["axis_y"]:
+            cmd += " Y"
+            cmd += str(values[1])
+        if self.config["lens"][self.lens_name]["motor"]["function"]["axis_z"]:
+            cmd += " Z"
+            cmd += str(values[2])
+        if self.config["lens"][self.lens_name]["motor"]["function"]["axis_a"]:
+            cmd += " A"
+            cmd += str(values[3])
+        cmd += " F"
+        cmd += self.combo_speed.currentText()
+        self.hw.send(cmd+"\n")
 
+
+    def preset_set(self, nr):
+        #print("set", nr)
+        self.presets.set_values(nr, ch0=self.status.pos_x, ch1=self.status.pos_y, ch2=self.status.pos_z, ch3=self.status.pos_a)
+        
     def comboBox_keypoints_changed(self, value):
         if len(value)>0:
             p = self.dbg_keypoints.points[int(value)]
@@ -442,351 +480,10 @@ class MyWindowClass(QtWidgets.QMainWindow, gui.Ui_MainWindow):
                 self.hw.send_buffered(cmd+"\n")
                 
 
-    '''        
-    def btn_new_keypoint_file_clicked(self):
-        self.kpt = keypoints.Keypoints(self.lens_name)
-        self.kpt.save()
-
-        self.btn_new_keypoint_file.setEnabled(False)
-        self.btn_new_keypoint.setEnabled(True)
-        # TODO: make all gray and disabled again
-
-        #self.btn_save_keypoint_minx.setEnabled(True)
-        #self.btn_save_keypoint_miny.setEnabled(True)
-        #self.btn_save_keypoint_minz.setEnabled(True)
-        #self.btn_save_keypoint_mina.setEnabled(True)
-        #self.btn_save_keypoint_maxx.setEnabled(True)
-        #self.btn_save_keypoint_maxy.setEnabled(True)
-        #self.btn_save_keypoint_maxz.setEnabled(True)
-        #self.btn_save_keypoint_maxa.setEnabled(True)
-    '''
-
-    '''
-    def btn_new_keypoint_clicked(self):
-        self.kpt.new_kp()
-        self.kpt.save()
-
-        self.btn_keypoint_mark_focused.setStyleSheet("")
-        self.btn_save_keypoint_miny.setStyleSheet("")
-        self.btn_save_keypoint_maxy.setStyleSheet("")
-        self.btn_save_keypoint_minz.setStyleSheet("")
-        self.btn_save_keypoint_maxz.setStyleSheet("")
-        
-        self.btn_new_keypoint.setEnabled(False)
-        self.btn_keypoint_mark_focused.setEnabled(True)
-        #self.btn_x_left.setEnabled(False)
-        #self.btn_x_right.setEnabled(False)
-
-        #self.label_keypoint_count.setText(str(self.kpt.count))
-
-        #self.btn_save_keypoint_minx.setEnabled(True)
-        #self.btn_save_keypoint_maxx.setEnabled(True)
-
-        self.btn_save_keypoint_miny.setEnabled(True)
-        self.btn_save_keypoint_maxy.setEnabled(True)
-
-        self.btn_save_keypoint_minz.setEnabled(True)
-        self.btn_save_keypoint_maxz.setEnabled(True)
-        
-        #self.btn_save_keypoint_mina.setEnabled(True)
-        #self.btn_save_keypoint_maxa.setEnabled(True)
-
-        #self.btn_save_keypoint_minx.setStyleSheet("background-color: " + COLOR_GREEN)
-        #print(self.btn_keypoint_mark_focused.styleSheet())
-    '''
-
-    '''
-    def btn_keypoint_mark_focused_clicked(self):
-        self.btn_keypoint_mark_focused.setStyleSheet("background-color: " + COLOR_GREEN)
-        self.kpt.set_kp_val("x", self.s_global.pos_x)    
-        self.kpt.set_kp_val("y", self.s_global.pos_y)    
-        self.kpt.set_kp_val("z", self.s_global.pos_z)    
-        self.kpt.save()
-
-        if self.kpt.validate_point():
-            self.btn_new_keypoint.setEnabled(True)
-    
-    def btn_save_keypoint_miny_clicked(self):
-        self.btn_save_keypoint_miny.setStyleSheet("background-color: " + COLOR_GREEN)
-        self.kpt.set_kp_val("miny", self.s_global.pos_y)
-        self.kpt.save()
-
-        if self.kpt.validate_point():
-            self.btn_new_keypoint.setEnabled(True)
-
-    def btn_save_keypoint_maxy_clicked(self):
-        self.btn_save_keypoint_maxy.setStyleSheet("background-color: " + COLOR_GREEN)
-        self.kpt.set_kp_val("maxy", self.s_global.pos_y)
-        self.kpt.save()
-
-        if self.kpt.validate_point():
-            self.btn_new_keypoint.setEnabled(True)
-
-    def btn_save_keypoint_minz_clicked(self):
-        self.btn_save_keypoint_minz.setStyleSheet("background-color: " + COLOR_GREEN)
-        self.kpt.set_kp_val("minz", self.s_global.pos_z)
-        self.kpt.save()
-
-        if self.kpt.validate_point():
-            self.btn_new_keypoint.setEnabled(True)
-
-    def btn_save_keypoint_maxz_clicked(self):
-        self.btn_save_keypoint_maxz.setStyleSheet("background-color: " + COLOR_GREEN)
-        self.kpt.set_kp_val("maxz", self.s_global.pos_z)
-        self.kpt.save()
-
-        if self.kpt.validate_point():
-            self.btn_new_keypoint.setEnabled(True)
-    '''
-
-  
-    def push_pr1_go_clicked(self):
-        preset = self.config["lens"][self.lens_name]["preset"]["p1"].split(" ")  
-        cmd =  "G90 G1"
-        if self.config["lens"][self.lens_name]["motor"]["function"]["axis_x"]:
-            cmd += " X"
-            cmd += preset[0]
-        if self.config["lens"][self.lens_name]["motor"]["function"]["axis_y"]:
-            cmd += " Y"
-            cmd += preset[1]
-        if self.config["lens"][self.lens_name]["motor"]["function"]["axis_z"]:
-            cmd += " Z"
-            cmd += preset[2]
-        if self.config["lens"][self.lens_name]["motor"]["function"]["axis_a"]:
-            cmd += " A"
-            cmd += preset[3]
-        cmd += " F"
-        cmd += self.combo_speed.currentText()
-        self.hw.send(cmd+"\n")
-
-    def push_pr2_go_clicked(self):
-        preset = self.config["lens"][self.lens_name]["preset"]["p2"].split(" ")  
-        cmd =  "G90 G1"
-        if self.config["lens"][self.lens_name]["motor"]["function"]["axis_x"]:
-            cmd += " X"
-            cmd += preset[0]
-        if self.config["lens"][self.lens_name]["motor"]["function"]["axis_y"]:
-            cmd += " Y"
-            cmd += preset[1]
-        if self.config["lens"][self.lens_name]["motor"]["function"]["axis_z"]:
-            cmd += " Z"
-            cmd += preset[2]
-        if self.config["lens"][self.lens_name]["motor"]["function"]["axis_a"]:
-            cmd += " A"
-            cmd += preset[3]
-        cmd += " F"
-        cmd += self.combo_speed.currentText()
-        self.hw.send(cmd+"\n")
-
-    def push_pr3_go_clicked(self):
-        preset = self.config["lens"][self.lens_name]["preset"]["p3"].split(" ")  
-        cmd =  "G90 G1"
-        if self.config["lens"][self.lens_name]["motor"]["function"]["axis_x"]:
-            cmd += " X"
-            cmd += preset[0]
-        if self.config["lens"][self.lens_name]["motor"]["function"]["axis_y"]:
-            cmd += " Y"
-            cmd += preset[1]
-        if self.config["lens"][self.lens_name]["motor"]["function"]["axis_z"]:
-            cmd += " Z"
-            cmd += preset[2]
-        if self.config["lens"][self.lens_name]["motor"]["function"]["axis_a"]:
-            cmd += " A"
-            cmd += preset[3]
-        cmd += " F"
-        cmd += self.combo_speed.currentText()
-        self.hw.send(cmd+"\n")
-
-    def push_pr4_go_clicked(self):
-        preset = self.config["lens"][self.lens_name]["preset"]["p4"].split(" ")  
-        cmd =  "G90 G1"
-        if self.config["lens"][self.lens_name]["motor"]["function"]["axis_x"]:
-            cmd += " X"
-            cmd += preset[0]
-        if self.config["lens"][self.lens_name]["motor"]["function"]["axis_y"]:
-            cmd += " Y"
-            cmd += preset[1]
-        if self.config["lens"][self.lens_name]["motor"]["function"]["axis_z"]:
-            cmd += " Z"
-            cmd += preset[2]
-        if self.config["lens"][self.lens_name]["motor"]["function"]["axis_a"]:
-            cmd += " A"
-            cmd += preset[3]
-        cmd += " F"
-        cmd += self.combo_speed.currentText()
-        self.hw.send(cmd+"\n")
-
-    def push_pr5_go_clicked(self):
-        preset = self.config["lens"][self.lens_name]["preset"]["p5"].split(" ")  
-        cmd =  "G90 G1"
-        if self.config["lens"][self.lens_name]["motor"]["function"]["axis_x"]:
-            cmd += " X"
-            cmd += preset[0]
-        if self.config["lens"][self.lens_name]["motor"]["function"]["axis_y"]:
-            cmd += " Y"
-            cmd += preset[1]
-        if self.config["lens"][self.lens_name]["motor"]["function"]["axis_z"]:
-            cmd += " Z"
-            cmd += preset[2]
-        if self.config["lens"][self.lens_name]["motor"]["function"]["axis_a"]:
-            cmd += " A"
-            cmd += preset[3]
-        cmd += " F"
-        cmd += self.combo_speed.currentText()
-        self.hw.send(cmd+"\n")
-
-
-
-    def push_pr1_set_clicked(self):
-        if self.config["lens"][self.lens_name]["motor"]["function"]["axis_x"]:
-            val_x = str(self.status.pos_x)
-        else:
-            val_x = "--"
-
-        if self.config["lens"][self.lens_name]["motor"]["function"]["axis_y"]:
-            val_y = str(self.status.pos_y)
-        else:
-            val_y = "--"
-
-        if self.config["lens"][self.lens_name]["motor"]["function"]["axis_z"]:
-            val_z = str(self.status.pos_z)
-        else:
-            val_z = "--"
-
-        if self.config["lens"][self.lens_name]["motor"]["function"]["axis_a"]:
-            val_a = str(self.status.pos_a)
-        else:
-            val_a = "--"
-
-        self.config["lens"][self.lens_name]["preset"]["p1"] = val_x+" "+val_y+" "+val_z+" "+val_a
-
-        self.label_pr1_x.setText(val_x)
-        self.label_pr1_y.setText(val_y)
-        self.label_pr1_z.setText(val_z)
-        self.label_pr1_a.setText(val_a)
-        
-
-    def push_pr2_set_clicked(self):
-        if self.config["lens"][self.lens_name]["motor"]["function"]["axis_x"]:
-            val_x = str(self.status.pos_x)
-        else:
-            val_x = "--"
-
-        if self.config["lens"][self.lens_name]["motor"]["function"]["axis_y"]:
-            val_y = str(self.status.pos_y)
-        else:
-            val_y = "--"
-
-        if self.config["lens"][self.lens_name]["motor"]["function"]["axis_z"]:
-            val_z = str(self.status.pos_z)
-        else:
-            val_z = "--"
-
-        if self.config["lens"][self.lens_name]["motor"]["function"]["axis_a"]:
-            val_a = str(self.status.pos_a)
-        else:
-            val_a = "--"
-
-        self.config["lens"][self.lens_name]["preset"]["p2"] = val_x+" "+val_y+" "+val_z+" "+val_a
-
-        self.label_pr2_x.setText(val_x)
-        self.label_pr2_y.setText(val_y)
-        self.label_pr2_z.setText(val_z)
-        self.label_pr2_a.setText(val_a)
-        
-
-    def push_pr3_set_clicked(self):
-        if self.config["lens"][self.lens_name]["motor"]["function"]["axis_x"]:
-            val_x = str(self.status.pos_x)
-        else:
-            val_x = "--"
-
-        if self.config["lens"][self.lens_name]["motor"]["function"]["axis_y"]:
-            val_y = str(self.status.pos_y)
-        else:
-            val_y = "--"
-
-        if self.config["lens"][self.lens_name]["motor"]["function"]["axis_z"]:
-            val_z = str(self.status.pos_z)
-        else:
-            val_z = "--"
-
-        if self.config["lens"][self.lens_name]["motor"]["function"]["axis_a"]:
-            val_a = str(self.status.pos_a)
-        else:
-            val_a = "--"
-
-        self.config["lens"][self.lens_name]["preset"]["p3"] = val_x+" "+val_y+" "+val_z+" "+val_a
-
-        self.label_pr3_x.setText(val_x)
-        self.label_pr3_y.setText(val_y)
-        self.label_pr3_z.setText(val_z)
-        self.label_pr3_a.setText(val_a)
-        
-
-    def push_pr4_set_clicked(self):
-        if self.config["lens"][self.lens_name]["motor"]["function"]["axis_x"]:
-            val_x = str(self.status.pos_x)
-        else:
-            val_x = "--"
-
-        if self.config["lens"][self.lens_name]["motor"]["function"]["axis_y"]:
-            val_y = str(self.status.pos_y)
-        else:
-            val_y = "--"
-
-        if self.config["lens"][self.lens_name]["motor"]["function"]["axis_z"]:
-            val_z = str(self.status.pos_z)
-        else:
-            val_z = "--"
-
-        if self.config["lens"][self.lens_name]["motor"]["function"]["axis_a"]:
-            val_a = str(self.status.pos_a)
-        else:
-            val_a = "--"
-
-        self.config["lens"][self.lens_name]["preset"]["p4"] = val_x+" "+val_y+" "+val_z+" "+val_a
-
-        self.label_pr4_x.setText(val_x)
-        self.label_pr4_y.setText(val_y)
-        self.label_pr4_z.setText(val_z)
-        self.label_pr4_a.setText(val_a)
-        
-
-    def push_pr5_set_clicked(self):
-        if self.config["lens"][self.lens_name]["motor"]["function"]["axis_x"]:
-            val_x = str(self.status.pos_x)
-        else:
-            val_x = "--"
-
-        if self.config["lens"][self.lens_name]["motor"]["function"]["axis_y"]:
-            val_y = str(self.status.pos_y)
-        else:
-            val_y = "--"
-
-        if self.config["lens"][self.lens_name]["motor"]["function"]["axis_z"]:
-            val_z = str(self.status.pos_z)
-        else:
-            val_z = "--"
-
-        if self.config["lens"][self.lens_name]["motor"]["function"]["axis_a"]:
-            val_a = str(self.status.pos_a)
-        else:
-            val_a = "--"
-
-        self.config["lens"][self.lens_name]["preset"]["p5"] = val_x+" "+val_y+" "+val_z+" "+val_a
-
-        self.label_pr5_x.setText(val_x)
-        self.label_pr5_y.setText(val_y)
-        self.label_pr5_z.setText(val_z)
-        self.label_pr5_a.setText(val_a)
-
-
     def btn_all_seek_clicked(self):
         # If command is issued when lens is in telephoto position it stalls
         #cmd = "$H"
         #self.hw.send(cmd+"\n")
-
 
         if self.lens_name == "L084":
             cmd = "$HX"
@@ -1109,45 +806,30 @@ class MyWindowClass(QtWidgets.QMainWindow, gui.Ui_MainWindow):
                 if "iris"  in self.config["lens"][self.lens_name]:
                     self.group_iris.setEnabled(True)
 
-                self.group_p1.setEnabled(True)
-                self.group_p2.setEnabled(True)
-                self.group_p3.setEnabled(True)
-                self.group_p4.setEnabled(True)
-                self.group_p5.setEnabled(True)
+                self.presetGroup.setEnabled(True)
+                #self.group_p2.setEnabled(True)
+                #self.group_p3.setEnabled(True)
+                #self.group_p4.setEnabled(True)
+                #self.group_p5.setEnabled(True)
                 self.group_homing.setEnabled(True)
                 self.group_guided_zoom1.setEnabled(True)
                 self.group_guided_focus1.setEnabled(True)
                 self.group_keypoints_2.setEnabled(True)
 
-                preset = self.config["lens"][self.lens_name]["preset"]["p1"].split(" ")
-                self.label_pr1_x.setText(preset[0])
-                self.label_pr1_y.setText(preset[1])
-                self.label_pr1_z.setText(preset[2])
-                self.label_pr1_a.setText(preset[3])
+                preset = split_preset_values(self.config["lens"][self.lens_name]["preset"]["p1"], value_count=4)
+                self.presets.set_values(0, ch0=preset[0], ch1=preset[1], ch2=preset[2], ch3=preset[3])
 
-                preset = self.config["lens"][self.lens_name]["preset"]["p2"].split(" ")
-                self.label_pr2_x.setText(preset[0])
-                self.label_pr2_y.setText(preset[1])
-                self.label_pr2_z.setText(preset[2])
-                self.label_pr2_a.setText(preset[3])
+                preset = split_preset_values(self.config["lens"][self.lens_name]["preset"]["p2"], value_count=4)
+                self.presets.set_values(1, ch0=preset[0], ch1=preset[1], ch2=preset[2], ch3=preset[3])
 
-                preset = self.config["lens"][self.lens_name]["preset"]["p3"].split(" ")
-                self.label_pr3_x.setText(preset[0])
-                self.label_pr3_y.setText(preset[1])
-                self.label_pr3_z.setText(preset[2])
-                self.label_pr3_a.setText(preset[3])
+                preset = split_preset_values(self.config["lens"][self.lens_name]["preset"]["p3"], value_count=4)
+                self.presets.set_values(2, ch0=preset[0], ch1=preset[1], ch2=preset[2], ch3=preset[3])
 
-                preset = self.config["lens"][self.lens_name]["preset"]["p4"].split(" ")
-                self.label_pr4_x.setText(preset[0])
-                self.label_pr4_y.setText(preset[1])
-                self.label_pr4_z.setText(preset[2])
-                self.label_pr4_a.setText(preset[3])
-
-                preset = self.config["lens"][self.lens_name]["preset"]["p5"].split(" ")
-                self.label_pr5_x.setText(preset[0])
-                self.label_pr5_y.setText(preset[1])
-                self.label_pr5_z.setText(preset[2])
-                self.label_pr5_a.setText(preset[3])
+                preset = split_preset_values(self.config["lens"][self.lens_name]["preset"]["p4"], value_count=4)
+                self.presets.set_values(3, ch0=preset[0], ch1=preset[1], ch2=preset[2], ch3=preset[3])
+                
+                preset = split_preset_values(self.config["lens"][self.lens_name]["preset"]["p5"], value_count=4)
+                self.presets.set_values(4, ch0=preset[0], ch1=preset[1], ch2=preset[2], ch3=preset[3])
 
                 if self.config["lens"][self.lens_name]["motor"]["function"]["axis_x"]:
                     self.group_x_axis.setEnabled(True)
@@ -1165,16 +847,12 @@ class MyWindowClass(QtWidgets.QMainWindow, gui.Ui_MainWindow):
                     self.group_a_axis.setEnabled(True)
                     self.group_a_axis.setTitle("A axis / " + self.config["lens"][self.lens_name]["motor"]["function"]["axis_a"])
 
-
-                # RRRRRRRRRRRRRRRRRR
                 self.dbg_keypoints = keypoints.Keypoints(self.config["lens"][self.lens_name]["debug_keypoints"])
 
                 items = []
                 for i in range(len(self.dbg_keypoints.points)):
                     items.append(str(i))
                 self.comboBox_keypoints.addItems(items)
-
-
                
 
                 # ------------------
@@ -1281,7 +959,6 @@ class MyWindowClass(QtWidgets.QMainWindow, gui.Ui_MainWindow):
 
         self.status = s
 
-
         # setting data to the scatter plot
         if self.lens_name:
             self.scatter_focus_zoom.setData([s.pos_x], [s.pos_z])
@@ -1301,38 +978,30 @@ class MyWindowClass(QtWidgets.QMainWindow, gui.Ui_MainWindow):
             if s.limit_x:
                 self.label_x_pi.setText('LOW')
                 #self.label_x_pi.setStyleSheet("color: " + COLOR_RED)
-                #self.btn_x_seek.setEnabled(False)
             else:
                 self.label_x_pi.setText('HIGH')
                 #self.label_x_pi.setStyleSheet("")
-                #self.btn_x_seek.setEnabled(True)
 
             if s.limit_y:
                 self.label_y_pi.setText('LOW')
                 #self.label_y_pi.setStyleSheet("color: " + COLOR_RED)
-                #self.btn_y_seek.setEnabled(False)
             else:
                 self.label_y_pi.setText('HIGH')
                 #self.label_y_pi.setStyleSheet("")
-                #self.btn_y_seek.setEnabled(True)
 
             if s.limit_z:
                 self.label_z_pi.setText('LOW')
                 #self.label_z_pi.setStyleSheet("color: " + COLOR_RED)
-                #self.btn_z_seek.setEnabled(False)
             else:
                 self.label_z_pi.setText('HIGH')
                 #self.label_z_pi.setStyleSheet("")
-                #self.btn_z_seek.setEnabled(True)
 
             if s.limit_a:
                 self.label_a_pi.setText('LOW')
                 #self.label_a_pi.setStyleSheet("color: " + COLOR_RED)
-                #self.btn_a_seek.setEnabled(False)
             else:
                 self.label_a_pi.setText('HIGH')
                 #self.label_a_pi.setStyleSheet("")
-                #self.btn_a_seek.setEnabled(True)
 
 
         self.label_buffer_count.setText(str(s.block_buffer_avail))
@@ -1341,185 +1010,35 @@ class MyWindowClass(QtWidgets.QMainWindow, gui.Ui_MainWindow):
 
         self.last_updated_pos = time.time()
 
-        '''
-        if str(s.status) == "Run":
-            now = time.time()
-            print(now - self.last_updated_pos)
-            if (now - self.last_updated_pos) > 0.5:
-                #time.sleep(0.5)
-                # TODO: add watchdog
-                print(s.status)
-                self.hw.send_buffered('?')
-           
-            self.last_updated_pos = now
-        '''
-
-        '''
-        if len(text) < 5:
-            return None
-
-        if text[0] != "<":
-            return None
-
-        if not ((text[0] == "<") and (text[-1] == ">")):
-            raise Exception("Bad format 1")
-
-        text = text[1:-1]
-        feedback_split = text.split("|")
-
-        status["STATUS"] = feedback_split[0]
-
-        if feedback_split[1].find("MPos") < 0:
-            raise Exception("Bad format 2")
-
-        positions = feedback_split[1].split(":")
-        if len(positions) != 2:
-            raise Exception("Bad format 3")
-
-        positions = positions[1]
-        positions = positions.split(",")
-        if len(positions) != 4:
-            raise Exception("Bad format 4")
-
-        status["MPOS_X"] = float(positions[0])
-        status["MPOS_Y"] = float(positions[1])
-        status["MPOS_Z"] = float(positions[2])
-        status["MPOS_A"] = float(positions[3])
-
-        positions = feedback_split[2].split(":")
-        if len(positions) != 2:
-            raise Exception("Bad format 5")
-
-        positions = positions[1]
-        positions = positions.split(",")
-        if len(positions) != 2:
-            raise Exception("Bad format 6")
-
-        status["BUFFERS"] = int(positions[0])
-
-        active_axis = self.gcode_generator.dialog.ui.combo_active_axis.currentText()
-        mpos_x = float(status["MPOS_"+active_axis])
-        self.s_position.setText("{:.2f}°".format(mpos_x))
-
-        commands_in_buffer = self.hw.commands.qsize()
-        self.progress_program.setValue(self.progress_program.maximum() - int(commands_in_buffer))
-        self.s_status.setText(status["STATUS"])
-        self.update_enabled_elements()
-        '''
-
-
-
-
-    '''
-    def push_run_clicked(self):
-        line_count = 0
-        for line in self.current_motion_profile["text"]["text_gcode"].splitlines():
-            self.hw.send(line+"\n")
-            line_count += 1
-
-        self.progress_program.setMaximum(line_count)
-        self.progress_program.setValue(line_count)
-
-        self.update_enabled_elements()
-
-
-    def controller_read(self, data):
-        pass
-
-
-
-
-    def action_about_clicked(self):
-        dialog = QtWidgets.QDialog()
-        dialog.ui = about_ui.Ui_About()
-        dialog.ui.setupUi(dialog)
-        dialog.exec_()
-
-    def action_settings_clicked(self):
-        dialog = QtWidgets.QDialog()
-        dialog.ui = settings_ui.Ui_Settings()
-        dialog.ui.setupUi(dialog)
-
-        dialog.ui.check_remember_last_com_port.setChecked(self.config["remember_last_com_port"])
-
-        ret = dialog.exec_()
-        if ret:
-            self.config["remember_last_com_port"] = dialog.ui.check_remember_last_com_port.isChecked()
-
-    def action_edit_motion_script_clicked(self):
-        ret = self.gcode_generator.show_modal()
-        if ret:
-            self.gcode_generator.push_generate_clicked()
-            active_axis = self.gcode_generator.dialog.ui.combo_active_axis.currentText()
-            self.manual_control.set_active_axis(active_axis)
-
-            values = self.gcode_generator.collect_values()
-            self.current_motion_profile = values
-            self.action_save_script.setEnabled(True)
-
-        self.update_enabled_elements()
-
-    def action_manual_control_clicked(self):
-        self.manual_control.show()
-
-    def action_monitor_clicked(self):
-        self.monitor.show()
-
-    def current_line_feedback(self, text):
-        if len(text)>2:
-            if text[0] == ";":
-                text_ = text[1:].strip()
-                self.label_gcode_comment.setText(text_)
-
-    def action_save_script_clicked(self):
-        with open(self.source_filename, 'w') as outfile:
-            json.dump(self.current_motion_profile, outfile)
-
-    def action_save_as_script_clicked(self):
-        fileName, _ = QFileDialog.getSaveFileName(self, "Save motion script as...", "", "Motion script (*.profile)")
-        if fileName:
-            with open(fileName, 'w') as outfile:
-                json.dump(self.current_motion_profile, outfile)
-
-
-    def action_load_script_clicked(self):
-        fileName, _ = QFileDialog.getOpenFileName(self, "Open motion script...", "", "Motion script (*.profile)")
-        if fileName:
-            with open(fileName) as json_file:
-                self.current_motion_profile = json.load(json_file)
-                self.gcode_generator.populate_values(self.current_motion_profile)
-
-                script_name = Path(fileName).stem
-                self.s_script.setText(script_name)
-                self.update_enabled_elements()
-                self.action_save_script.setEnabled(True)
-                self.action_save_as_script.setEnabled(True)
-                self.source_filename = fileName
-
-
-    '''
 
     def closeEvent(self, event):
         global config
         global running
 
 
-
         if self.s_status.text() == "Connected":
-            p1 = self.label_pr1_x.text()+" "+self.label_pr1_y.text()+" "+self.label_pr1_z.text()+" "+self.label_pr1_a.text()
-            self.config["lens"][self.lens_name]["preset"]["p1"] = p1
+            
+            # TODO: change yaml format, get axis count, make cycle
 
-            p2 = self.label_pr2_x.text()+" "+self.label_pr2_y.text()+" "+self.label_pr2_z.text()+" "+self.label_pr2_a.text()
-            self.config["lens"][self.lens_name]["preset"]["p2"] = p2
+            p = self.presets.get_values(0)
+            p = str(p[0])+" "+str(p[1])+" "+str(p[2])+" "+str(p[3])
+            self.config["lens"][self.lens_name]["preset"]["p1"] = p
 
-            p3 = self.label_pr3_x.text()+" "+self.label_pr3_y.text()+" "+self.label_pr3_z.text()+" "+self.label_pr3_a.text()
-            self.config["lens"][self.lens_name]["preset"]["p3"] = p3
+            p = self.presets.get_values(1)
+            p = str(p[0])+" "+str(p[1])+" "+str(p[2])+" "+str(p[3])
+            self.config["lens"][self.lens_name]["preset"]["p2"] = p
 
-            p4 = self.label_pr4_x.text()+" "+self.label_pr4_y.text()+" "+self.label_pr4_z.text()+" "+self.label_pr4_a.text()
-            self.config["lens"][self.lens_name]["preset"]["p4"] = p4
+            p = self.presets.get_values(2)
+            p = str(p[0])+" "+str(p[1])+" "+str(p[2])+" "+str(p[3])
+            self.config["lens"][self.lens_name]["preset"]["p3"] = p
 
-            p5 = self.label_pr5_x.text()+" "+self.label_pr5_y.text()+" "+self.label_pr5_z.text()+" "+self.label_pr5_a.text()
-            self.config["lens"][self.lens_name]["preset"]["p5"] = p5
+            p = self.presets.get_values(3)
+            p = str(p[0])+" "+str(p[1])+" "+str(p[2])+" "+str(p[3])
+            self.config["lens"][self.lens_name]["preset"]["p4"] = p
+
+            p = self.presets.get_values(4)
+            p = str(p[0])+" "+str(p[1])+" "+str(p[2])+" "+str(p[3])
+            self.config["lens"][self.lens_name]["preset"]["p5"] = p
 
         utils.exit_routine(SETTINGS_FILE, self.config)
         running = False
