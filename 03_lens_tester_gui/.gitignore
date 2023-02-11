@@ -12,3 +12,4 @@ out
 *.bak*
 *.lnk
 keypoints.txt
+tests
