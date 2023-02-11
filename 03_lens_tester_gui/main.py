@@ -16,6 +16,7 @@ import utils
 import motion
 import gui
 import preset_widget
+import pos_widget
 from scipy.interpolate import interp1d
 import keypoints
 import time
@@ -139,10 +140,10 @@ class MyWindowClass(QtWidgets.QMainWindow, gui.Ui_MainWindow):
         self.group_keypoints_2.setEnabled(False)
         self.group_guided_zoom1.setEnabled(False)
         self.group_guided_focus1.setEnabled(False)
-        self.group_x_axis.setEnabled(False)
-        self.group_y_axis.setEnabled(False)
-        self.group_z_axis.setEnabled(False)
-        self.group_a_axis.setEnabled(False)
+        #self.group_x_axis.setEnabled(False)
+        #self.group_y_axis.setEnabled(False)
+        #self.group_z_axis.setEnabled(False)
+        #self.group_a_axis.setEnabled(False)
         self.presetGroup.setEnabled(False)
         self.focus_slider1.setEnabled(True) # should be enabled in edittor, but there is a bug. workaround
         #self.group_p2.setEnabled(False)
@@ -183,15 +184,6 @@ class MyWindowClass(QtWidgets.QMainWindow, gui.Ui_MainWindow):
         self.btn_iris_on.clicked.connect(self.btn_iris_on_clicked)
         self.btn_iris_off.clicked.connect(self.btn_iris_off_clicked)
 
-        self.btn_x_left.clicked.connect(self.btn_x_left_clicked)
-        self.btn_x_right.clicked.connect(self.btn_x_right_clicked)
-        self.btn_y_left.clicked.connect(self.btn_y_left_clicked)
-        self.btn_y_right.clicked.connect(self.btn_y_right_clicked)
-        self.btn_z_left.clicked.connect(self.btn_z_left_clicked)
-        self.btn_z_right.clicked.connect(self.btn_z_right_clicked)
-        self.btn_a_left.clicked.connect(self.btn_a_left_clicked)
-        self.btn_a_right.clicked.connect(self.btn_a_right_clicked)
-        
         self.btn_x_seek.clicked.connect(self.btn_x_seek_clicked)
         self.btn_y_seek.clicked.connect(self.btn_y_seek_clicked)
         self.btn_z_seek.clicked.connect(self.btn_z_seek_clicked)
@@ -222,6 +214,7 @@ class MyWindowClass(QtWidgets.QMainWindow, gui.Ui_MainWindow):
         #self.timer.start(1000)
 
         self.presetGroup.hide()
+        self.group_x_axis.hide()
         #layout.removeWidget(self.widget_name)
         #self.widget_name.deleteLater()
         #self.widget_name = None
@@ -231,6 +224,10 @@ class MyWindowClass(QtWidgets.QMainWindow, gui.Ui_MainWindow):
         self.presets = preset_widget.Preset(self.horizontalLayout, 5)
         self.presets.clicked_set.connect(self.preset_set)
         self.presets.clicked_go.connect(self.preset_go)
+        
+        self.pos = pos_widget.Pos(self.verticalLayout, 4)
+        self.pos.moved.connect(self.pos_move)
+
 
         self.plot = self.win.addPlot()
         self.plot.showGrid(True, True, 0.2)
@@ -286,6 +283,21 @@ class MyWindowClass(QtWidgets.QMainWindow, gui.Ui_MainWindow):
         self.hw.log_tx.connect(self.monitor.add_log_cmd)
 
         '''
+
+    def pos_move(self, ch, dir):
+        cmd = "G91 "
+        cmd += self.pos.axis_names[ch]
+        if dir == 1:
+            cmd += "-"
+        elif dir == 0:
+            pass
+        else:
+            print("Direction should be 0 or 1!")
+        cmd += str(self.combo_step.currentText())
+        cmd += " F"
+        cmd += str(self.combo_speed.currentText())
+        self.hw.send(cmd+"\n")
+
 
     def preset_go(self, nr, values):
         #print("Widget GO", nr, values)
@@ -414,7 +426,9 @@ class MyWindowClass(QtWidgets.QMainWindow, gui.Ui_MainWindow):
         f1 = interp1d(curve_focus_inf["x"], curve_focus_inf["y"], kind='cubic')
         f3 = interp1d(curve_focus_near["x"], curve_focus_near["y"], kind='cubic')
 
-        x_pos = float(self.label_x_pos.text())
+        #x_pos = float(self.label_x_pos.text())
+        x_pos = self.pos.pos_list[0].value
+
         new_focus_pos = f1(x_pos)+(f3(x_pos)-f1(x_pos))*value/100
         if self.lens_name == "L084":
             cmd = "G90 G1"
@@ -541,63 +555,6 @@ class MyWindowClass(QtWidgets.QMainWindow, gui.Ui_MainWindow):
         self.hw.send(cmd+"\n")
 
 
-
-    def btn_x_left_clicked(self):
-        cmd = "G91 X-"
-        cmd += str(self.combo_step.currentText())
-        cmd += " F"
-        cmd += str(self.combo_speed.currentText())
-        self.hw.send(cmd+"\n")
-
-    def btn_x_right_clicked(self):
-        cmd = "G91 X"
-        cmd += str(self.combo_step.currentText())
-        cmd += " F"
-        cmd += str(self.combo_speed.currentText())
-        self.hw.send(cmd+"\n")
-
-    def btn_y_left_clicked(self):
-        cmd = "G91 Y-"
-        cmd += str(self.combo_step.currentText())
-        cmd += " F"
-        cmd += str(self.combo_speed.currentText())
-        self.hw.send(cmd+"\n")
-
-    def btn_y_right_clicked(self):
-        cmd = "G91 Y"
-        cmd += str(self.combo_step.currentText())
-        cmd += " F"
-        cmd += str(self.combo_speed.currentText())
-        self.hw.send(cmd+"\n")
-
-    def btn_z_left_clicked(self):
-        cmd = "G91 Z-"
-        cmd += str(self.combo_step.currentText())
-        cmd += " F"
-        cmd += str(self.combo_speed.currentText())
-        self.hw.send(cmd+"\n")
-
-    def btn_z_right_clicked(self):
-        cmd = "G91 Z"
-        cmd += str(self.combo_step.currentText())
-        cmd += " F"
-        cmd += str(self.combo_speed.currentText())
-        self.hw.send(cmd+"\n")
-
-    def btn_a_left_clicked(self):
-        cmd = "G91 A-"
-        cmd += str(self.combo_step.currentText())
-        cmd += " F"
-        cmd += str(self.combo_speed.currentText())
-        self.hw.send(cmd+"\n")
-
-    def btn_a_right_clicked(self):
-        cmd = "G91 A"
-        cmd += str(self.combo_step.currentText())
-        cmd += " F"
-        cmd += str(self.combo_speed.currentText())
-        self.hw.send(cmd+"\n")
-
     def btn_f1_on_clicked(self):
         cmd = self.config["lens"][self.lens_name]["filter1"]["state_on"]
 
@@ -664,6 +621,8 @@ class MyWindowClass(QtWidgets.QMainWindow, gui.Ui_MainWindow):
     def btn_disconnect_clicked(self):
         self.hw.disconnect()
         self.plot.clear()
+        self.presets.setEnabled(False)
+        self.pos.setEnabled(False)
 
     def btn_com_refresh_clicked(self):
         self.combo_ports.clear()
@@ -823,6 +782,20 @@ class MyWindowClass(QtWidgets.QMainWindow, gui.Ui_MainWindow):
                 preset = split_preset_values(self.config["lens"][self.lens_name]["preset"]["p5"], value_count=4)
                 self.presets.set_values(4, ch0=preset[0], ch1=preset[1], ch2=preset[2], ch3=preset[3])
 
+
+                self.presets.setEnabled(True)
+                self.pos.setEnabled(True)
+                if self.config["lens"][self.lens_name]["motor"]["function"]["axis_x"]:
+                    self.pos.set_name(0, "X axis / " + self.config["lens"][self.lens_name]["motor"]["function"]["axis_x"])
+                if self.config["lens"][self.lens_name]["motor"]["function"]["axis_y"]:
+                    self.pos.set_name(1, "Y axis / " + self.config["lens"][self.lens_name]["motor"]["function"]["axis_y"])
+                if self.config["lens"][self.lens_name]["motor"]["function"]["axis_z"]:
+                    self.pos.set_name(2, "Z axis / " + self.config["lens"][self.lens_name]["motor"]["function"]["axis_z"])
+                if self.config["lens"][self.lens_name]["motor"]["function"]["axis_a"]:
+                    self.pos.set_name(3, "A axis / " + self.config["lens"][self.lens_name]["motor"]["function"]["axis_a"])
+
+
+                '''
                 if self.config["lens"][self.lens_name]["motor"]["function"]["axis_x"]:
                     self.group_x_axis.setEnabled(True)
                     self.group_x_axis.setTitle("X axis / " + self.config["lens"][self.lens_name]["motor"]["function"]["axis_x"])
@@ -838,6 +811,7 @@ class MyWindowClass(QtWidgets.QMainWindow, gui.Ui_MainWindow):
                 if self.config["lens"][self.lens_name]["motor"]["function"]["axis_a"]:
                     self.group_a_axis.setEnabled(True)
                     self.group_a_axis.setTitle("A axis / " + self.config["lens"][self.lens_name]["motor"]["function"]["axis_a"])
+                '''
 
                 self.dbg_keypoints = keypoints.Keypoints(self.config["lens"][self.lens_name]["debug_keypoints"])
 
@@ -944,45 +918,15 @@ class MyWindowClass(QtWidgets.QMainWindow, gui.Ui_MainWindow):
             self.scatter_focus_zoom.setData([s.pos_x], [s.pos_z])
             self.scatter_compensate.setData([s.pos_x], [s.pos_y])
 
-        self.label_x_pos.setText(str(round(s.pos_x,3)))
-        self.label_y_pos.setText(str(round(s.pos_y,3)))
-        self.label_z_pos.setText(str(round(s.pos_z,3)))
-        self.label_a_pos.setText(str(round(s.pos_a,3)))
+        self.pos.set_value(0, s.pos_x, s.limit_x)
+        self.pos.set_value(1, s.pos_y, s.limit_y)
+        self.pos.set_value(2, s.pos_z, s.limit_z)
+        self.pos.set_value(3, s.pos_a, s.limit_a)
 
         self.btn_x_seek.setEnabled(True)
         self.btn_y_seek.setEnabled(True)
         self.btn_z_seek.setEnabled(True)
         self.btn_a_seek.setEnabled(True)
-
-        if s.limit_available:
-            if s.limit_x:
-                self.label_x_pi.setText('LOW')
-                #self.label_x_pi.setStyleSheet("color: " + COLOR_RED)
-            else:
-                self.label_x_pi.setText('HIGH')
-                #self.label_x_pi.setStyleSheet("")
-
-            if s.limit_y:
-                self.label_y_pi.setText('LOW')
-                #self.label_y_pi.setStyleSheet("color: " + COLOR_RED)
-            else:
-                self.label_y_pi.setText('HIGH')
-                #self.label_y_pi.setStyleSheet("")
-
-            if s.limit_z:
-                self.label_z_pi.setText('LOW')
-                #self.label_z_pi.setStyleSheet("color: " + COLOR_RED)
-            else:
-                self.label_z_pi.setText('HIGH')
-                #self.label_z_pi.setStyleSheet("")
-
-            if s.limit_a:
-                self.label_a_pi.setText('LOW')
-                #self.label_a_pi.setStyleSheet("color: " + COLOR_RED)
-            else:
-                self.label_a_pi.setText('HIGH')
-                #self.label_a_pi.setStyleSheet("")
-
 
         self.label_buffer_count.setText(str(s.block_buffer_avail))
         self.label_motion_status.setText(str(s.status))
@@ -994,7 +938,6 @@ class MyWindowClass(QtWidgets.QMainWindow, gui.Ui_MainWindow):
     def closeEvent(self, event):
         global config
         global running
-
 
         if self.s_status.text() == "Connected":
             

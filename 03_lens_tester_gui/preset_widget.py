@@ -17,8 +17,9 @@ class PresetPoint(QWidget):
 
         QWidget.__init__(self, parent=None)
         self.lay = QVBoxLayout(self)
+
         self.preset_group = QtWidgets.QGroupBox()
-        self.preset_group.setEnabled(True)
+        self.preset_group.setEnabled(False)
         self.preset_group.setGeometry(QtCore.QRect(30, 20, 131, 141))
         self.preset_group.setObjectName("preset_group")
         self.gridLayout_6 = QtWidgets.QGridLayout(self.preset_group)
@@ -158,6 +159,13 @@ class PresetPoint(QWidget):
             self.label_c.setText(str(round(ch5,3)))
 
 
+    def setEnabled(self, enabled):
+        if enabled:
+            self.preset_group.setEnabled(True)
+        else:
+            self.preset_group.setEnabled(False)
+
+
 class Preset(QWidget):
     clicked_go = pyqtSignal(int, list)
     clicked_set = pyqtSignal(int)
@@ -172,10 +180,10 @@ class Preset(QWidget):
         #self.lay = QHBoxLayout(self)
         #self.parent.setLayout(self.lay)
 
+
         QWidget.__init__(self, parent=None)
         self.lay = parent
         #self.parent.setLayout(self.lay)
-
 
         for i in range(self.preset_cnt):
             self.preset_list[i] = PresetPoint(name="Preset "+str(i), nr=i, ch_count=self.ch_count)
@@ -198,8 +206,10 @@ class Preset(QWidget):
 
     def get_values(self, preset):
         return self.preset_list[preset].values
-
-
+    
+    def setEnabled(self, enabled):
+        for i in range(self.preset_cnt):
+            self.preset_list[i].setEnabled(enabled)
 
 
 # fill from dict
