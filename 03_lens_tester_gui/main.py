@@ -6,7 +6,6 @@ import sys
 from pathlib import Path
 from PyQt5 import QtCore, QtGui, QtWidgets, uic, QtSvg
 from PyQt5.QtCore import *
-#from PyQt5.QtCore import Qt, QTimer, QThread
 from PyQt5.QtGui import *
 from PyQt5.QtWidgets import *
 from PyQt5.QtCore import Qt
@@ -232,7 +231,13 @@ class MyWindowClass(QtWidgets.QMainWindow, gui.Ui_MainWindow):
         self.presets.clicked_set.connect(self.preset_set)
         self.presets.clicked_go.connect(self.preset_go)
 
-
+        self.plot = self.win.addPlot()
+        self.plot.showGrid(True, True, 0.2)
+        self.plot.setMenuEnabled(enableMenu=False)
+        self.plot.hideButtons()
+        self.plot.setMouseEnabled(x=False, y=False)
+        self.plot.addLegend()
+        
 
         '''
         # Status Bar
@@ -665,6 +670,7 @@ class MyWindowClass(QtWidgets.QMainWindow, gui.Ui_MainWindow):
 
     def btn_disconnect_clicked(self):
         self.hw.disconnect()
+        self.plot.clear()
 
     def btn_com_refresh_clicked(self):
         self.combo_ports.clear()
@@ -685,8 +691,7 @@ class MyWindowClass(QtWidgets.QMainWindow, gui.Ui_MainWindow):
             self.hw.action_recipe.put("version")
             self.hw.action_recipe.put("get_param_list")
             self.timer.start(100)
-            
-            
+                       
         if text == "Disconnected":
             self.hw_connected = False
             self.timer.stop()
@@ -787,9 +792,7 @@ class MyWindowClass(QtWidgets.QMainWindow, gui.Ui_MainWindow):
                 if default_speed:
                     self.combo_speed.setCurrentText(default_speed)
 
-
                 self.group_mdi.setEnabled(True)
-
 
                 if "filter1"  in self.config["lens"][self.lens_name]:
                     self.group_filter1.setEnabled(True)
@@ -806,11 +809,7 @@ class MyWindowClass(QtWidgets.QMainWindow, gui.Ui_MainWindow):
                 if "iris"  in self.config["lens"][self.lens_name]:
                     self.group_iris.setEnabled(True)
 
-                self.presetGroup.setEnabled(True)
-                #self.group_p2.setEnabled(True)
-                #self.group_p3.setEnabled(True)
-                #self.group_p4.setEnabled(True)
-                #self.group_p5.setEnabled(True)
+                self.presetGroup.setEnabled(True)                
                 self.group_homing.setEnabled(True)
                 self.group_guided_zoom1.setEnabled(True)
                 self.group_guided_focus1.setEnabled(True)
@@ -853,21 +852,9 @@ class MyWindowClass(QtWidgets.QMainWindow, gui.Ui_MainWindow):
                 for i in range(len(self.dbg_keypoints.points)):
                     items.append(str(i))
                 self.comboBox_keypoints.addItems(items)
-               
-
-                # ------------------
-
-                self.plot = self.win.addPlot()
-                self.plot.showGrid(True, True, 0.2)
-                self.plot.setMenuEnabled(enableMenu=False)
-                self.plot.hideButtons()
-                self.plot.setMouseEnabled(x=False, y=False)
-                self.plot.addLegend()
-                                                
-                # TODO: clean after fresh load
-                
+                                                           
+                self.plot.clear()               
                 interpolate_count = 100 # TBD: move to config
-
                 for curve in self.config["lens"][self.lens_name]["motor"]["curves"]:
                     try:
                         lens_yaml = self.config["lens"][self.lens_name]["motor"]["curves"][curve]
