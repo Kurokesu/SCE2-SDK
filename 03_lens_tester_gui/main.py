@@ -517,7 +517,8 @@ class MyWindowClass(QtWidgets.QMainWindow, gui.Ui_MainWindow):
 
         if self.lens_name == "L117":
             # Workaround. Sometimes if Z is in -4..-2 Y axis can't home
-            cmd = "G91 G0 Z2"
+            # TODO: check if HIGH, move only then
+            cmd = "G91 G0 Z2 F1000"
             self.hw.send(cmd+"\n")
 
             cmd = "$HA"
@@ -530,11 +531,15 @@ class MyWindowClass(QtWidgets.QMainWindow, gui.Ui_MainWindow):
             self.hw.send(cmd+"\n")
 
         if self.lens_name == "L086":
+            # TODO: check if HIGH, move only then
+            cmd = "G91 G0 X-12 Y-6 F1000"
+            self.hw.send(cmd+"\n")
+
+            cmd = "$HZ"
+            self.hw.send(cmd+"\n")
             cmd = "$HX"
             self.hw.send(cmd+"\n")
             cmd = "$HY"
-            self.hw.send(cmd+"\n")
-            cmd = "$HZ"
             self.hw.send(cmd+"\n")
 
 

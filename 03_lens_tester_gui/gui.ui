@@ -292,17 +292,17 @@
            <string>Filter1</string>
           </property>
           <layout class="QGridLayout" name="gridLayout_4">
-           <item row="0" column="1">
-            <widget class="QPushButton" name="btn_f1_on">
-             <property name="text">
-              <string>ON</string>
-             </property>
-            </widget>
-           </item>
            <item row="0" column="2">
             <widget class="QPushButton" name="btn_f1_off">
              <property name="text">
               <string>OFF</string>
+             </property>
+            </widget>
+           </item>
+           <item row="0" column="1">
+            <widget class="QPushButton" name="btn_f1_on">
+             <property name="text">
+              <string>ON</string>
              </property>
             </widget>
            </item>
