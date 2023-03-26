@@ -836,14 +836,10 @@ class MyWindowClass(QtWidgets.QMainWindow, gui.Ui_MainWindow):
                         data_x = [i-pull_off for i in data_x]
                         data_y = [i-pull_off for i in data_y]
 
-                        # Dots                        
-                        pen1 = pg.mkPen(color=lens_yaml["color"])
-                        im_p = self.plot.plot(pen=None, symbol='o', symbolSize = 3, symbolPen=pen1)
-                        im_p.setData(data_x, data_y)
-                                            
-                        # Wrong interpolation curve
-                        #(data_x, data_y) = approximate_spline(data_x, data_y, interpolate_count)
-                        #self.plot_focus_inf.setData(x=data_x, y=data_y)
+                        # Dots for main graph
+                        #pen1 = pg.mkPen(color=lens_yaml["color"])
+                        #im_p = self.plot.plot(pen=None, symbol='o', symbolSize = 3, symbolPen=pen1)
+                        #im_p.setData(data_x, data_y)                                            
 
                         # Interpolated curve
                         f2 = interp1d(data_x, data_y, kind='cubic')
