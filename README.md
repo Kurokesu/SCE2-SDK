@@ -1,5 +1,7 @@
 Kurokesu SCF2 multi-axis stepper motor controller System On Module (SOM) based motorized zoom lenses. Detailed documentation can be found on [Kurokesu Wiki](https://wiki.kurokesu.com/books/motorized-zoom-lenses), direct ordering on [Kurokesu E-store](https://www.kurokesu.com/shop/motorized_zoom_lenses)
 
+**Please jump to [auto_calibration branch](https://github.com/Kurokesu/SCE2-SDK/tree/auto_calibration) - it will be migrated to the main branch soon.**
+
 ## Fully tested lens with dedicated SCE2-M based controller
 * [x] L086 (x18, 1/1.8")
 * [x] L084 (x40, 1/1.8")
