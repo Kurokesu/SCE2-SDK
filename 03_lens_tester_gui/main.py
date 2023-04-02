@@ -450,7 +450,21 @@ class MyWindowClass(QtWidgets.QMainWindow, gui.Ui_MainWindow):
 
 
     def zoom_slider1_changed(self, value):
+        available_inf = False
+        available_near = False
+        available_correction = False
+
+        '''
+        if "focus_inf" in self.config["lens"][self.lens_name]["motor"]["curves"]:
+            available_inf = True
+        if "focus_near" in self.config["lens"][self.lens_name]["motor"]["curves"]:
+            available_near = True
+        if "zoom_correction" in self.config["lens"][self.lens_name]["motor"]["curves"]:
+            available_correction = True
+        '''
+
         interpolate_count = self.config["lens"][self.lens_name]["motor"]["interpolate_count"]
+        
         curve_focus_inf = self.config["lens"][self.lens_name]["motor"]["curves"]["focus_inf"]
         curve_zoom_correction = self.config["lens"][self.lens_name]["motor"]["curves"]["zoom_correction"]
 
@@ -470,7 +484,6 @@ class MyWindowClass(QtWidgets.QMainWindow, gui.Ui_MainWindow):
         diff = np.abs(pos_from-pos_to)
         resolution = 0.5
         self.zoom_slider_memory = pos_to # backup last value
-
 
         if self.lens_name == "L084":
             for i in np.linspace(normalized100(pos_from), normalized100(pos_to), int(diff/resolution), endpoint=True):
@@ -499,6 +512,14 @@ class MyWindowClass(QtWidgets.QMainWindow, gui.Ui_MainWindow):
                 cmd += " F2000"
                 self.hw.send_buffered(cmd+"\n")
                 
+        if self.lens_name == "L085":
+            for i in np.linspace(normalized100(pos_from), normalized100(pos_to), int(diff/resolution), endpoint=True):
+                cmd = "G90 G1"
+                cmd += " X"+str(i)
+                cmd += " Y"+str(f2(i))
+                cmd += " F2000"
+                self.hw.send_buffered(cmd+"\n")
+
 
     def btn_all_seek_clicked(self):
         # If command is issued when lens is in telephoto position it stalls
