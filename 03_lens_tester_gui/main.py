@@ -953,7 +953,8 @@ class MyWindowClass(QtWidgets.QMainWindow, gui.Ui_MainWindow):
                 f1 = interp1d(curve_focal_range["x"], curve_focal_range["y"], kind='cubic')
                 focal_len = round(float(f1(s.pos_x)), 2)
                 self.label_focal_length.setText(str(focal_len))
-        except:
+        except Exception as e:
+            print("rrrrrrrrrrrrr", e)
             pass
 
         self.pos.set_value(1, s.pos_y, s.limit_y)
