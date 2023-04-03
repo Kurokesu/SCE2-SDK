@@ -140,6 +140,7 @@ class MyWindowClass(QtWidgets.QMainWindow, gui.Ui_MainWindow):
         self.group_keypoints_2.setEnabled(False)
         self.group_guided_zoom1.setEnabled(False)
         self.group_guided_focus1.setEnabled(False)
+        self.group_focal_length.setEnabled(False)
         #self.group_x_axis.setEnabled(False)
         #self.group_y_axis.setEnabled(False)
         #self.group_z_axis.setEnabled(False)
@@ -792,6 +793,7 @@ class MyWindowClass(QtWidgets.QMainWindow, gui.Ui_MainWindow):
                 self.group_guided_zoom1.setEnabled(True)
                 self.group_guided_focus1.setEnabled(True)
                 self.group_keypoints_2.setEnabled(True)
+                self.group_focal_length.setEnabled(True)
 
                 preset = split_preset_values(self.config["lens"][self.lens_name]["preset"]["p1"], value_count=4)
                 self.presets.set_values(0, ch0=preset[0], ch1=preset[1], ch2=preset[2], ch3=preset[3])
@@ -942,6 +944,18 @@ class MyWindowClass(QtWidgets.QMainWindow, gui.Ui_MainWindow):
             self.scatter_compensate.setData([s.pos_x], [s.pos_y])
 
         self.pos.set_value(0, s.pos_x, s.limit_x)
+        try:
+            # TODO: handle more delicate
+            if "focal_range" in self.config["lens"][self.lens_name]["motor"]["curves"]:
+                # do not calculate full interpolation here, move to init section
+                interpolate_count = self.config["lens"][self.lens_name]["motor"]["interpolate_count"]
+                curve_focal_range = self.config["lens"][self.lens_name]["motor"]["curves"]["focal_range"]
+                f1 = interp1d(curve_focal_range["x"], curve_focal_range["y"], kind='cubic')
+                focal_len = round(float(f1(s.pos_x)), 2)
+                self.label_focal_length.setText(str(focal_len))
+        except:
+            pass
+
         self.pos.set_value(1, s.pos_y, s.limit_y)
         self.pos.set_value(2, s.pos_z, s.limit_z)
         self.pos.set_value(3, s.pos_a, s.limit_a)
