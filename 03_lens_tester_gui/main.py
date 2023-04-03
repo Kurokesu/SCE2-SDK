@@ -850,24 +850,25 @@ class MyWindowClass(QtWidgets.QMainWindow, gui.Ui_MainWindow):
                 interpolate_count = 100 # TBD: move to config
                 for curve in self.config["lens"][self.lens_name]["motor"]["curves"]:
                     try:
-                        lens_yaml = self.config["lens"][self.lens_name]["motor"]["curves"][curve]
-                        pull_off = lens_yaml["pulloff"]
-                        data_x = lens_yaml["x"]
-                        data_y = lens_yaml["y"]
-                        data_x = [i-pull_off for i in data_x]
-                        data_y = [i-pull_off for i in data_y]
+                        if self.config["lens"][self.lens_name]["motor"]["curves"][curve]["show"]:
+                            lens_yaml = self.config["lens"][self.lens_name]["motor"]["curves"][curve]
+                            pull_off = lens_yaml["pulloff"]
+                            data_x = lens_yaml["x"]
+                            data_y = lens_yaml["y"]
+                            data_x = [i-pull_off for i in data_x]
+                            data_y = [i-pull_off for i in data_y]
 
-                        # Dots for main graph
-                        #pen1 = pg.mkPen(color=lens_yaml["color"])
-                        #im_p = self.plot.plot(pen=None, symbol='o', symbolSize = 3, symbolPen=pen1)
-                        #im_p.setData(data_x, data_y)                                            
+                            # Dots for main graph
+                            #pen1 = pg.mkPen(color=lens_yaml["color"])
+                            #im_p = self.plot.plot(pen=None, symbol='o', symbolSize = 3, symbolPen=pen1)
+                            #im_p.setData(data_x, data_y)                                            
 
-                        # Interpolated curve
-                        f2 = interp1d(data_x, data_y, kind='cubic')
-                        xnew = np.linspace(min(data_x), max(data_x), num=interpolate_count, endpoint=True)
-                        pen2 = pg.mkPen(color=lens_yaml["color"], style=QtCore.Qt.SolidLine)
-                        im_i = self.plot.plot(pen=pen2, name=lens_yaml["name"])
-                        im_i.setData(x=xnew, y=f2(xnew))
+                            # Interpolated curve
+                            f2 = interp1d(data_x, data_y, kind='cubic')
+                            xnew = np.linspace(min(data_x), max(data_x), num=interpolate_count, endpoint=True)
+                            pen2 = pg.mkPen(color=lens_yaml["color"], style=QtCore.Qt.SolidLine)
+                            im_i = self.plot.plot(pen=pen2, name=lens_yaml["name"])
+                            im_i.setData(x=xnew, y=f2(xnew))
 
                     except Exception as e:
                         LOGGER.error(str(e))

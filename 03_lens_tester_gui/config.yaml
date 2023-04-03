@@ -1,9 +1,9 @@
-boot_count: 1334
+boot_count: 1343
 clean_exit: true
 com_baud: 115200
 com_timeout: 5
 controller_feedback_interval: 50
-last_lens: L086
+last_lens: L084
 lens:
   L084:
     debug_keypoints:
@@ -125,6 +125,7 @@ lens:
           color: '#0000FF'
           name: Focus infinity
           pulloff: 0
+          show: true
           x:
           - 35.88
           - 35.86
@@ -6001,6 +6002,7 @@ lens:
           color: '#00FF00'
           name: Focus near
           pulloff: 0
+          show: true
           x:
           - 35.88
           - 35.86
@@ -11877,6 +11879,7 @@ lens:
           color: '#606060'
           name: Zoom correction
           pulloff: 0
+          show: true
           x:
           - 35.88
           - 35.86
@@ -17801,6 +17804,7 @@ lens:
           color: '#0000FF'
           name: Focus infinity
           pulloff: 0
+          show: true
           x:
           - -19.5
           - -19.48
@@ -20883,6 +20887,7 @@ lens:
           color: '#00FF00'
           name: Focus near
           pulloff: 0
+          show: true
           x:
           - -19.5
           - -19.48
@@ -24036,6 +24041,7 @@ lens:
           color: '#0000FF'
           name: Focus infinity
           pulloff: 0
+          show: true
           x:
           - 12.683953
           - 12.663942
@@ -26518,6 +26524,7 @@ lens:
           color: '#00FF00'
           name: Focus near
           pulloff: 0
+          show: true
           x:
           - 12.683953
           - 12.663942
@@ -29000,6 +29007,7 @@ lens:
           color: '#606060'
           name: Zoom correction
           pulloff: 0
+          show: true
           x:
           - 12.683953
           - 12.663942
@@ -31590,6 +31598,7 @@ lens:
           color: '#0000FF'
           name: Focus infinty
           pulloff: 0
+          show: true
           x:
           - 46.1
           - 46.08
@@ -36678,6 +36687,7 @@ lens:
           color: '#00FF00'
           name: Focus near
           pulloff: 0
+          show: true
           x:
           - 46.1
           - 46.08
@@ -41766,6 +41776,7 @@ lens:
           color: '#606060'
           name: Zoom correction
           pulloff: 0
+          show: true
           x:
           - 46.1
           - 46.08
@@ -46883,5 +46894,5 @@ lens:
       image_circle: 9.2
       lpm: 250
 logging_level: DEBUG
-port: COM493
+port: COM296
 remember_last_com_port: true
