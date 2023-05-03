@@ -521,6 +521,14 @@ class MyWindowClass(QtWidgets.QMainWindow, gui.Ui_MainWindow):
                 cmd += " F2000"
                 self.hw.send_buffered(cmd+"\n")
 
+        if self.lens_name == "L120":
+            for i in np.linspace(normalized100(pos_from), normalized100(pos_to), int(diff/resolution), endpoint=True):
+                cmd = "G90 G1"
+                cmd += " X"+str(i)
+                cmd += " Y"+str(f2(i))
+                cmd += " F2000"
+                self.hw.send_buffered(cmd+"\n")
+
 
     def btn_all_seek_clicked(self):
         # If command is issued when lens is in telephoto position it stalls
@@ -564,6 +572,17 @@ class MyWindowClass(QtWidgets.QMainWindow, gui.Ui_MainWindow):
             cmd = "$HY"
             self.hw.send(cmd+"\n")
 
+        if self.lens_name == "L085":
+            cmd = "$HX"
+            self.hw.send(cmd+"\n")
+            cmd = "$HY"
+            self.hw.send(cmd+"\n")
+
+        if self.lens_name == "L120":
+            cmd = "$HX"
+            self.hw.send(cmd+"\n")
+            cmd = "$HY"
+            self.hw.send(cmd+"\n")
 
     def btn_x_seek_clicked(self):
         cmd = "$HX"
@@ -721,6 +740,10 @@ class MyWindowClass(QtWidgets.QMainWindow, gui.Ui_MainWindow):
             lens_detected = False
             if i[0:3] == "LS8":
                 self.lens_name = "L085"
+                lens_detected = True
+
+            if i[0:3] == "DFW":
+                self.lens_name = "L120"
                 lens_detected = True
 
             if i[0:3] == "6ZG":
