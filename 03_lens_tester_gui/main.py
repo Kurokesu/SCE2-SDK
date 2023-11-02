@@ -449,7 +449,6 @@ class MyWindowClass(QtWidgets.QMainWindow, gui.Ui_MainWindow):
             cmd += " F2000"
             self.hw.send_buffered(cmd+"\n")
 
-
     def zoom_slider1_changed(self, value):
         available_inf = False
         available_near = False
@@ -583,6 +582,12 @@ class MyWindowClass(QtWidgets.QMainWindow, gui.Ui_MainWindow):
             self.hw.send(cmd+"\n")
             cmd = "$HY"
             self.hw.send(cmd+"\n")
+
+        if self.lens_name == "L144":
+            cmd = "$HX"
+            self.hw.send(cmd+"\n")
+            cmd = "$HY"
+
 
     def btn_x_seek_clicked(self):
         cmd = "$HX"
@@ -756,6 +761,10 @@ class MyWindowClass(QtWidgets.QMainWindow, gui.Ui_MainWindow):
 
             if i[0:3] == "EFJ":
                 self.lens_name = "L117"
+                lens_detected = True
+
+            if i[0:3] == "9WJ":
+                self.lens_name = "L144"
                 lens_detected = True
 
 
