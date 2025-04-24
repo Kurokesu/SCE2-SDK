@@ -26,6 +26,7 @@ class SerialComm(QObject):
     
     port = None
     commands = queue.Queue()
+    commands_buffered = queue.Queue()
     action_connect = queue.Queue()
     action_disconnect = queue.Queue()
     action_recipe = queue.Queue()
@@ -48,6 +49,9 @@ class SerialComm(QObject):
 
     def send(self, data):
         self.commands.put(data)
+
+    def send_buffered(self, data):
+        self.commands_buffered.put(data)
 
     def __ser_send(self, ser, data, monitor=True):
         ser.flushInput()
@@ -160,8 +164,12 @@ class SerialComm(QObject):
 
                                 if retry_cnt > 0:
                                     LOGGER.info("* Retry count:"+str(retry_cnt))
+                                    #if retry_cnt > 100:
+                                    #    LOGGER.info("Forced break - reset controller")
+                                    #    self.__ser_send(ser, '\x18', monitor=False)
+                                    #    break
 
-                                retry_cnt += 1
+                                retry_cnt += 1                                
 
                             ser.timeout = backup_timeout
 
@@ -211,6 +219,52 @@ class SerialComm(QObject):
 
                         ser.timeout = backup_timeout
                         '''
+
+
+
+                    # NNNNNNNNNNNNNNNNNNNNNNNNNNNNN
+                    if not self.commands_buffered.empty():
+                        f = self.commands_buffered.get()
+
+                        cmd = "?"
+                        backup_timeout = ser.timeout
+                        ser.timeout = 0.01
+                        r1 = ""
+
+                        while(1):
+                            self.__ser_send(ser, cmd, monitor=False)
+                            status = self.__ser_read(ser, monitor=False)
+                            if len(status) > 10:
+                                if (status[0] == "<") and (status[-1] == ">"):
+                                    r1 = status
+                                    #print(r1)
+                                    #break
+
+                            try:
+                                if r1[0] == "<":
+                                        # <Idle|MPos:0.000,0.000,0.000,0.000|Bf:35,254|FS:0,0|Pn:X>
+                                        text = r1[1:-1]
+                                        feedback_split = text.split("|")
+                                        positions = feedback_split[2].split(":")
+                                        positions = positions[1]
+                                        positions = positions.split(",")
+                                        buffers = int(positions[0])
+                                        status = feedback_split[0]
+                                        self.serFeedback.emit(r1)
+
+                                        # GRBL command buffer = 0
+                                        if buffers >= 2:
+                                            break
+                            except Exception as e:
+                                print("Parse error", e)
+
+                        ser.timeout = backup_timeout
+                        self.__ser_send(ser, f)
+
+
+
+
+
 
 
                     # some commands require certain sequence and testing, these are put into recipes

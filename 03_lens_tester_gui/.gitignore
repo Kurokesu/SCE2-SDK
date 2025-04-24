@@ -7,4 +7,9 @@ out
 *.bat
 *.spec
 *.log
+*.log.*
 *.bak
+*.bak*
+*.lnk
+keypoints.txt
+tests
