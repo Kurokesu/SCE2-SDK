@@ -35,7 +35,7 @@
   "filter1": {
     "name": "IR CUT",
     "state_off": "G90 G1 A0.7 F1",
-    "state_on": "G90 G1 A0.3 F1"
+    "state_on": "G90 G1 A-0.7 F1"
   },
   "iris": {
     "close": "M114 P0",
