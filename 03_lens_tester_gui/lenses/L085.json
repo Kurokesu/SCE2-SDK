@@ -3,7 +3,7 @@
   "description": "25x 5.3-130mm 1/2.7\"",
   "filter1": {
     "name": "IR CUT",
-    "state_off": "G90 G1 A1.5 F1",
+    "state_off": "G90 G1 A1.1 F1",
     "state_on": "G90 G1 A0 F1"
   },
   "iris": {
