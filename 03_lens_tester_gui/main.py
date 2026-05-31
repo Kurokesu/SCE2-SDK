@@ -29,6 +29,10 @@ LOGGER.info('start')
 SETTINGS_FILE = 'config.json'
 LENSES_DIR = 'lenses'
 
+# Guided focus slider extends the near<->infinity blend by this fraction beyond
+# each end (0.25 = +25% past near and +25% past infinity).
+FOCUS_RANGE_EXTEND = 0.25
+
 
 def approximate_spline(data_x, data_y, point_count):
     doc = ezdxf.new(dxfversion='R2010')
@@ -51,6 +55,32 @@ def approximate_spline(data_x, data_y, point_count):
         y_values.append(i[1])
 
     return((x_values, y_values))
+
+
+def clamped_interp(curve):
+    """Cubic interpolator that holds the endpoint value outside the data range.
+
+    Some curves (e.g. focus_near) don't cover the full zoom travel. Instead of
+    raising when queried out of range, the nearest endpoint value is reused.
+    """
+    xs = curve["x"]
+    ys = curve["y"]
+    y_lo = ys[xs.index(min(xs))]
+    y_hi = ys[xs.index(max(xs))]
+    return interp1d(xs, ys, kind='cubic', bounds_error=False, fill_value=(y_lo, y_hi))
+
+
+def is_axis_enabled(func_value):
+    """An axis is 'used' unless the lens config marks it as disabled.
+
+    Accepts the legacy magic string 'NOT_USED' as well as None / '' to keep
+    older lens JSON files working.
+    """
+    if func_value is None:
+        return False
+    if isinstance(func_value, str) and func_value.strip() in ("", "NOT_USED"):
+        return False
+    return True
 
 
 def split_preset_values(str_values, value_count=4):
@@ -382,6 +412,40 @@ class MyWindowClass(QtWidgets.QMainWindow, gui.Ui_MainWindow):
                 
         self.hw.send(new_cmd+"\n")
 
+    def axis_offset(self, axis_letter):
+        """Homing pull-off offset (mm) for an axis letter (X/Y/Z/A).
+
+        After homing, GRBL backs the axis off the limit switch by the pull-off
+        distance ($27) and calls that position zero. The drive curves are
+        referenced to the limit-switch point, so every absolute coordinate we
+        command must be shifted by this offset to reach the intended optical
+        position. The reported machine position is likewise shifted back into
+        curve coordinates before any curve lookup.
+
+        JSON formats supported under motor.homing_pulloff:
+            {"axis_x": 0.5, "axis_y": 0.5, "axis_z": 0, "axis_a": 0}
+            {"value": 0.5}   # legacy: same pull-off applied to every axis
+        """
+        if not self.lens_config:
+            return 0.0
+        pulloff = self.lens_config.get("motor", {}).get("homing_pulloff")
+        if not pulloff:
+            return 0.0
+        key = "axis_" + axis_letter.lower()
+        if key in pulloff:
+            return float(pulloff[key] or 0)
+        if "value" in pulloff:
+            return float(pulloff["value"] or 0)
+        return 0.0
+
+    def to_machine(self, axis_letter, curve_value):
+        """Convert a curve-frame coordinate to a machine coordinate to command."""
+        return float(curve_value) + self.axis_offset(axis_letter)
+
+    def to_curve(self, axis_letter, machine_value):
+        """Convert a reported machine coordinate back to curve-frame."""
+        return float(machine_value) - self.axis_offset(axis_letter)
+
     def pos_move(self, ch, dir):
         cmd = "G91 "
         cmd += self.pos.axis_names[ch]
@@ -400,16 +464,17 @@ class MyWindowClass(QtWidgets.QMainWindow, gui.Ui_MainWindow):
     def preset_go(self, nr, values):
         #print("Widget GO", nr, values)
         cmd =  "G90 G1"
-        if self.lens_config["motor"]["function"]["axis_x"]:
+        func = self.lens_config["motor"]["function"]
+        if is_axis_enabled(func["axis_x"]):
             cmd += " X"
             cmd += str(values[0])
-        if self.lens_config["motor"]["function"]["axis_y"]:
+        if is_axis_enabled(func["axis_y"]):
             cmd += " Y"
             cmd += str(values[1])
-        if self.lens_config["motor"]["function"]["axis_z"]:
+        if is_axis_enabled(func["axis_z"]):
             cmd += " Z"
             cmd += str(values[2])
-        if self.lens_config["motor"]["function"]["axis_a"]:
+        if is_axis_enabled(func["axis_a"]):
             cmd += " A"
             cmd += str(values[3])
         cmd += " F"
@@ -516,32 +581,52 @@ class MyWindowClass(QtWidgets.QMainWindow, gui.Ui_MainWindow):
 
 
     def focus_slider1_changed(self, value):
+        curves = self.lens_config["motor"]["curves"]
+        if "focus_inf" not in curves or "focus_near" not in curves:
+            return  # lens has no guided-focus drive curves
         interpolate_count = self.lens_config["motor"]["interpolate_count"]
-        curve_focus_inf = self.lens_config["motor"]["curves"]["focus_inf"]
-        curve_focus_near = self.lens_config["motor"]["curves"]["focus_near"]
+        curve_focus_inf = curves["focus_inf"]
+        curve_focus_near = curves["focus_near"]
 
-        f1 = interp1d(curve_focus_inf["x"], curve_focus_inf["y"], kind='cubic')
-        f3 = interp1d(curve_focus_near["x"], curve_focus_near["y"], kind='cubic')
+        f1 = clamped_interp(curve_focus_inf)
+        f3 = clamped_interp(curve_focus_near)
 
         #x_pos = float(self.label_x_pos.text())
-        x_pos = self.pos.pos_list[0].value
+        x_pos = self.to_curve("X", self.pos.pos_list[0].value)
 
-        new_focus_pos = f3(x_pos) * (1 - value/100) + f1(x_pos) * (value/100)
+        # Map slider 0..100 onto an extended blend factor. With the default
+        # FOCUS_RANGE_EXTEND=0.25 the slider runs from -0.25 (25% past near) to
+        # 1.25 (25% past infinity), extrapolating along the near->inf line.
+        ext = FOCUS_RANGE_EXTEND
+        t = (value / 100.0) * (1 + 2 * ext) - ext
+        new_focus_pos = f3(x_pos) * (1 - t) + f1(x_pos) * t
         if self.lens_name == "L084":
             cmd = "G90 G1"
-            cmd += " Y"+str(new_focus_pos)
+            cmd += " Y"+str(self.to_machine("Y", new_focus_pos))
             cmd += " F2000"
             self.hw.send_buffered(cmd+"\n")
 
         if self.lens_name == "L117":
             cmd = "G90 G1"
-            cmd += " Z"+str(new_focus_pos)
+            cmd += " Z"+str(self.to_machine("Z", new_focus_pos))
             cmd += " F2000"
             self.hw.send_buffered(cmd+"\n")
         
         if self.lens_name == "L086":
             cmd = "G90 G1"
-            cmd += " Z"+str(new_focus_pos)
+            cmd += " Z"+str(self.to_machine("Z", new_focus_pos))
+            cmd += " F2000"
+            self.hw.send_buffered(cmd+"\n")
+
+        if self.lens_name == "L195":
+            cmd = "G90 G1"
+            cmd += " Y"+str(self.to_machine("Y", new_focus_pos))
+            cmd += " F2000"
+            self.hw.send_buffered(cmd+"\n")
+
+        if self.lens_name == "L050":
+            cmd = "G90 G1"
+            cmd += " Y"+str(self.to_machine("Y", new_focus_pos))
             cmd += " F2000"
             self.hw.send_buffered(cmd+"\n")
 
@@ -550,6 +635,9 @@ class MyWindowClass(QtWidgets.QMainWindow, gui.Ui_MainWindow):
         available_near = False
         available_correction = False
 
+        if "focus_inf" not in self.lens_config["motor"]["curves"]:
+            return  # lens has no guided-zoom drive curve
+
         interpolate_count = self.lens_config["motor"]["interpolate_count"]
         
         curve_focus_inf = self.lens_config["motor"]["curves"]["focus_inf"]
@@ -557,19 +645,19 @@ class MyWindowClass(QtWidgets.QMainWindow, gui.Ui_MainWindow):
         # Check if zoom_correction curve exists
         if "zoom_correction" in self.lens_config["motor"]["curves"]:
             curve_zoom_correction = self.lens_config["motor"]["curves"]["zoom_correction"]
-            f2 = interp1d(curve_zoom_correction["x"], curve_zoom_correction["y"], kind='cubic')
+            f2 = clamped_interp(curve_zoom_correction)
             x2new = np.linspace(min(curve_zoom_correction["x"]), max(curve_zoom_correction["x"]), num=interpolate_count, endpoint=True)
             i_min = min(curve_zoom_correction["x"])
             i_max = max(curve_zoom_correction["x"])
         else:
             # If no zoom correction curve, use focus_inf curve for zoom
             curve_zoom_correction = curve_focus_inf
-            f2 = interp1d(curve_focus_inf["x"], curve_focus_inf["y"], kind='cubic')
+            f2 = clamped_interp(curve_focus_inf)
             x2new = np.linspace(min(curve_focus_inf["x"]), max(curve_focus_inf["x"]), num=interpolate_count, endpoint=True)
             i_min = min(curve_focus_inf["x"])
             i_max = max(curve_focus_inf["x"])
 
-        f1 = interp1d(curve_focus_inf["x"], curve_focus_inf["y"], kind='cubic')
+        f1 = clamped_interp(curve_focus_inf)
         x1new = np.linspace(min(curve_focus_inf["x"]), max(curve_focus_inf["x"]), num=interpolate_count, endpoint=True)
 
         normalized100 = interp1d((0, 100), (i_max, i_min))
@@ -582,51 +670,67 @@ class MyWindowClass(QtWidgets.QMainWindow, gui.Ui_MainWindow):
         if self.lens_name == "L084":
             for i in np.linspace(normalized100(pos_from), normalized100(pos_to), int(diff/resolution), endpoint=True):
                 cmd = "G90 G1"
-                cmd += " X"+str(i)
-                cmd += " Y"+str(f1(i))
-                cmd += " Z"+str(f2(i))
+                cmd += " X"+str(self.to_machine("X", i))
+                cmd += " Y"+str(self.to_machine("Y", f1(i)))
+                cmd += " Z"+str(self.to_machine("Z", f2(i)))
                 cmd += " F2000"
                 self.send_gcode_with_backlash(cmd)
 
         if self.lens_name == "L117":
             for i in np.linspace(normalized100(pos_from), normalized100(pos_to), int(diff/resolution), endpoint=True):
                 cmd = "G90 G1"
-                cmd += " X"+str(i)
-                cmd += " Y"+str(f2(i))
-                cmd += " Z"+str(f1(i))
+                cmd += " X"+str(self.to_machine("X", i))
+                cmd += " Y"+str(self.to_machine("Y", f2(i)))
+                cmd += " Z"+str(self.to_machine("Z", f1(i)))
                 cmd += " F2000"
                 self.send_gcode_with_backlash(cmd)
 
         if self.lens_name == "L086":
             for i in np.linspace(normalized100(pos_from), normalized100(pos_to), int(diff/resolution), endpoint=True):
                 cmd = "G90 G1"
-                cmd += " X"+str(i)
-                cmd += " Y"+str(f2(i))
-                cmd += " Z"+str(f1(i))
+                cmd += " X"+str(self.to_machine("X", i))
+                cmd += " Y"+str(self.to_machine("Y", f2(i)))
+                cmd += " Z"+str(self.to_machine("Z", f1(i)))
                 cmd += " F2000"
                 self.send_gcode_with_backlash(cmd)
                 
         if self.lens_name == "L085":
             for i in np.linspace(normalized100(pos_from), normalized100(pos_to), int(diff/resolution), endpoint=True):
                 cmd = "G90 G1"
-                cmd += " X"+str(i)
-                cmd += " Y"+str(f2(i))
+                cmd += " X"+str(self.to_machine("X", i))
+                cmd += " Y"+str(self.to_machine("Y", f2(i)))
                 cmd += " F2000"
                 self.send_gcode_with_backlash(cmd)
 
         if self.lens_name == "L085D":
             for i in np.linspace(normalized100(pos_from), normalized100(pos_to), int(diff/resolution), endpoint=True):
                 cmd = "G90 G1"
-                cmd += " X"+str(i)
-                cmd += " Y"+str(f2(i))
+                cmd += " X"+str(self.to_machine("X", i))
+                cmd += " Y"+str(self.to_machine("Y", f2(i)))
                 cmd += " F2000"
                 self.send_gcode_with_backlash(cmd)
 
         if self.lens_name == "L120":
             for i in np.linspace(normalized100(pos_from), normalized100(pos_to), int(diff/resolution), endpoint=True):
                 cmd = "G90 G1"
-                cmd += " X"+str(i)
-                cmd += " Y"+str(f2(i))
+                cmd += " X"+str(self.to_machine("X", i))
+                cmd += " Y"+str(self.to_machine("Y", f2(i)))
+                cmd += " F2000"
+                self.send_gcode_with_backlash(cmd)
+
+        if self.lens_name == "L195":
+            for i in np.linspace(normalized100(pos_from), normalized100(pos_to), int(diff/resolution), endpoint=True):
+                cmd = "G90 G1"
+                cmd += " X"+str(self.to_machine("X", i))
+                cmd += " Y"+str(self.to_machine("Y", f2(i)))
+                cmd += " F2000"
+                self.send_gcode_with_backlash(cmd)
+
+        if self.lens_name == "L050":
+            for i in np.linspace(normalized100(pos_from), normalized100(pos_to), int(diff/resolution), endpoint=True):
+                cmd = "G90 G1"
+                cmd += " X"+str(self.to_machine("X", i))
+                cmd += " Y"+str(self.to_machine("Y", f2(i)))
                 cmd += " F2000"
                 self.send_gcode_with_backlash(cmd)
 
@@ -691,7 +795,6 @@ class MyWindowClass(QtWidgets.QMainWindow, gui.Ui_MainWindow):
             cmd = "M120 P0"             # Disable LED
             self.hw.send(cmd+"\n")
 
-
         if self.lens_name == "L120":
             cmd = "$HX"
             self.hw.send(cmd+"\n")
@@ -702,7 +805,29 @@ class MyWindowClass(QtWidgets.QMainWindow, gui.Ui_MainWindow):
             cmd = "$HX"
             self.hw.send(cmd+"\n")
             cmd = "$HY"
+            self.hw.send(cmd+"\n")
 
+        if self.lens_name == "L195":
+            cmd = "$HY"
+            self.hw.send(cmd+"\n")
+            cmd = "$HX"
+            self.hw.send(cmd+"\n")
+
+        if self.lens_name == "L050":
+            cmd = "$HX"
+            self.hw.send(cmd+"\n")
+            cmd = "$HY"
+            self.hw.send(cmd+"\n")
+
+        if self.lens_name == "L196":
+            cmd = "$HX"
+            self.hw.send(cmd+"\n")
+            cmd = "$HY"
+            self.hw.send(cmd+"\n")
+            cmd = "$HZ"
+            self.hw.send(cmd+"\n")
+            cmd = "$HA"
+            self.hw.send(cmd+"\n")
 
     def btn_x_seek_clicked(self):
         cmd = "$HX"
@@ -781,7 +906,10 @@ class MyWindowClass(QtWidgets.QMainWindow, gui.Ui_MainWindow):
         self.hw.send(self.line_mdi.text()+"\n")
 
     def btn_connect_clicked(self):
-        self.config["port"] = self.combo_ports.currentText()
+        port = self.combo_ports.currentData()
+        if not port:
+            port = self.combo_ports.currentText()
+        self.config["port"] = port
         self.hw.connect(self.config["port"], self.config["com_baud"], self.config["com_timeout"])
 
     def btn_disconnect_clicked(self):
@@ -794,8 +922,14 @@ class MyWindowClass(QtWidgets.QMainWindow, gui.Ui_MainWindow):
         self.combo_ports.clear()
         com_ports = sorted(self.hw.get_compot_list())
         for port, desc in com_ports:
-            self.combo_ports.addItem(port.strip())
-        self.combo_ports.setCurrentIndex(self.combo_ports.findText(self.config["port"]))
+            device = port.strip()
+            self.combo_ports.addItem(device, device)
+            if desc and desc != "n/a":
+                idx = self.combo_ports.count() - 1
+                self.combo_ports.setItemData(idx, f"{device} \u2014 {desc}", Qt.ToolTipRole)
+        idx = self.combo_ports.findData(self.config["port"])
+        if idx >= 0:
+            self.combo_ports.setCurrentIndex(idx)
 
     def serStatus(self, text):
         self.s_status.setText(text)
@@ -950,15 +1084,22 @@ class MyWindowClass(QtWidgets.QMainWindow, gui.Ui_MainWindow):
                             self.presets.setEnabled(True)
                             self.pos.setEnabled(True)
 
-                            # Setup axis names
-                            if self.lens_config["motor"]["function"]["axis_x"]:
-                                self.pos.set_name(0, "X axis / " + self.lens_config["motor"]["function"]["axis_x"])
-                            if self.lens_config["motor"]["function"]["axis_y"]:
-                                self.pos.set_name(1, "Y axis / " + self.lens_config["motor"]["function"]["axis_y"])
-                            if self.lens_config["motor"]["function"]["axis_z"]:
-                                self.pos.set_name(2, "Z axis / " + self.lens_config["motor"]["function"]["axis_z"])
-                            if self.lens_config["motor"]["function"]["axis_a"]:
-                                self.pos.set_name(3, "A axis / " + self.lens_config["motor"]["function"]["axis_a"])
+                            # Setup axis names and per-axis enable state
+                            func = self.lens_config["motor"]["function"]
+                            seek_buttons = [self.btn_x_seek, self.btn_y_seek,
+                                            self.btn_z_seek, self.btn_a_seek]
+                            axis_keys = ["axis_x", "axis_y", "axis_z", "axis_a"]
+                            axis_letters = ["X", "Y", "Z", "A"]
+                            for i, key in enumerate(axis_keys):
+                                fn = func.get(key)
+                                if is_axis_enabled(fn):
+                                    self.pos.set_name(i, axis_letters[i] + " axis / " + str(fn))
+                                    self.pos.pos_list[i].setEnabled(True)
+                                    seek_buttons[i].setEnabled(True)
+                                else:
+                                    self.pos.set_name(i, axis_letters[i] + " axis / (unused)")
+                                    self.pos.pos_list[i].setEnabled(False)
+                                    seek_buttons[i].setEnabled(False)
 
                             # Setup debug keypoints
                             self.dbg_keypoints = keypoints.Keypoints(self.lens_config["debug_keypoints"])
@@ -1049,10 +1190,11 @@ class MyWindowClass(QtWidgets.QMainWindow, gui.Ui_MainWindow):
 
         self.status = s
 
-        # setting data to the scatter plot
+        # setting data to the scatter plot (curves are in curve-frame, reported
+        # positions are machine-frame, so shift them back before plotting)
         if self.lens_name:
-            self.scatter_focus_zoom.setData([s.pos_x], [s.pos_z])
-            self.scatter_compensate.setData([s.pos_x], [s.pos_y])
+            self.scatter_focus_zoom.setData([self.to_curve("X", s.pos_x)], [self.to_curve("Z", s.pos_z)])
+            self.scatter_compensate.setData([self.to_curve("X", s.pos_x)], [self.to_curve("Y", s.pos_y)])
 
         self.pos.set_value(0, s.pos_x, s.limit_x)
         #try:
@@ -1073,10 +1215,12 @@ class MyWindowClass(QtWidgets.QMainWindow, gui.Ui_MainWindow):
         self.pos.set_value(2, s.pos_z, s.limit_z)
         self.pos.set_value(3, s.pos_a, s.limit_a)
 
-        self.btn_x_seek.setEnabled(True)
-        self.btn_y_seek.setEnabled(True)
-        self.btn_z_seek.setEnabled(True)
-        self.btn_a_seek.setEnabled(True)
+        if self.lens_config is not None:
+            func = self.lens_config["motor"]["function"]
+            self.btn_x_seek.setEnabled(is_axis_enabled(func.get("axis_x")))
+            self.btn_y_seek.setEnabled(is_axis_enabled(func.get("axis_y")))
+            self.btn_z_seek.setEnabled(is_axis_enabled(func.get("axis_z")))
+            self.btn_a_seek.setEnabled(is_axis_enabled(func.get("axis_a")))
 
         self.label_buffer_count.setText(str(s.block_buffer_avail))
         self.label_motion_status.setText(str(s.status))

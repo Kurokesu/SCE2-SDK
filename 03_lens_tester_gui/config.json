@@ -1,11 +1,11 @@
 {
-  "boot_count": 1714,
+  "boot_count": 1786,
   "clean_exit": true,
   "com_baud": 115200,
   "com_timeout": 5,
   "controller_feedback_interval": 50,
-  "last_lens": "L120",
+  "last_lens": "L196",
   "logging_level": "DEBUG",
-  "port": "COM3501",
+  "port": "COM3510",
   "remember_last_com_port": true
 }
