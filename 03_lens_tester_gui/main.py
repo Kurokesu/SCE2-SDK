@@ -624,6 +624,12 @@ class MyWindowClass(QtWidgets.QMainWindow, gui.Ui_MainWindow):
             cmd += " F2000"
             self.hw.send_buffered(cmd+"\n")
 
+        if self.lens_name == "L201":
+            cmd = "G90 G1"
+            cmd += " Y"+str(self.to_machine("Y", new_focus_pos))
+            cmd += " F2000"
+            self.hw.send_buffered(cmd+"\n")
+
         if self.lens_name == "L050":
             cmd = "G90 G1"
             cmd += " Y"+str(self.to_machine("Y", new_focus_pos))
@@ -726,6 +732,14 @@ class MyWindowClass(QtWidgets.QMainWindow, gui.Ui_MainWindow):
                 cmd += " F2000"
                 self.send_gcode_with_backlash(cmd)
 
+        if self.lens_name == "L201":
+            for i in np.linspace(normalized100(pos_from), normalized100(pos_to), int(diff/resolution), endpoint=True):
+                cmd = "G90 G1"
+                cmd += " X"+str(self.to_machine("X", i))
+                cmd += " Y"+str(self.to_machine("Y", f2(i)))
+                cmd += " F2000"
+                self.send_gcode_with_backlash(cmd)
+
         if self.lens_name == "L050":
             for i in np.linspace(normalized100(pos_from), normalized100(pos_to), int(diff/resolution), endpoint=True):
                 cmd = "G90 G1"
@@ -808,6 +822,12 @@ class MyWindowClass(QtWidgets.QMainWindow, gui.Ui_MainWindow):
             self.hw.send(cmd+"\n")
 
         if self.lens_name == "L195":
+            cmd = "$HY"
+            self.hw.send(cmd+"\n")
+            cmd = "$HX"
+            self.hw.send(cmd+"\n")
+
+        if self.lens_name == "L201":
             cmd = "$HY"
             self.hw.send(cmd+"\n")
             cmd = "$HX"
