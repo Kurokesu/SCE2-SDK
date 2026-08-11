@@ -4,6 +4,7 @@ from PyQt5 import QtCore, QtGui, QtWidgets, uic, QtSvg
 import serial
 import time
 import queue
+import threading
 import serial.tools.list_ports
 
 import logging
@@ -25,6 +26,8 @@ class SerialComm(QObject):
     log_rx = pyqtSignal(str)
     
     port = None
+    ser = None
+    abort_flag = threading.Event()
     commands = queue.Queue()
     commands_buffered = queue.Queue()
     action_connect = queue.Queue()
@@ -52,6 +55,33 @@ class SerialComm(QObject):
 
     def send_buffered(self, data):
         self.commands_buffered.put(data)
+
+    def abort(self):
+        """Immediately stop all motion: drop queued commands and soft-reset GRBL.
+
+        The GRBL real-time soft-reset byte (0x18) is the only command that
+        stops a running homing cycle (feed hold is ignored while homing).
+        It is written directly to the port from the caller's thread because
+        the worker thread may be blocked waiting for the homing 'ok'.
+        The abort_flag makes the worker's wait loops bail out; the controller
+        is left in ALARM state and must be unlocked with $X afterwards.
+        """
+        self.abort_flag.set()
+
+        for q in (self.commands, self.commands_buffered):
+            while not q.empty():
+                try:
+                    q.get_nowait()
+                except queue.Empty:
+                    break
+
+        try:
+            if self.ser is not None and self.ser.is_open:
+                self.ser.write(b'\x18')
+                LOGGER.warning(">>> 0x18 (soft reset / abort)")
+                self.log_tx.emit("0x18 (soft reset)")
+        except Exception as e:
+            LOGGER.error("abort: failed to send soft reset: " + str(e))
 
     def __ser_send(self, ser, data, monitor=True):
         ser.reset_input_buffer()
@@ -89,10 +119,17 @@ class SerialComm(QObject):
                 ser.open()
                 ser.reset_input_buffer()
                 ser.reset_output_buffer()
+                self.ser = ser
+                self.abort_flag.clear()
 
                 self.strStatus.emit("Connected")
 
                 while stay_connected:
+                    # abort() already drained the queues and reset the
+                    # controller; resume normal operation
+                    if self.abort_flag.is_set():
+                        self.abort_flag.clear()
+
                     if not self.action_disconnect.empty():
                         self.action_disconnect.get()
                         #self.action_disconnect.clear()
@@ -111,6 +148,9 @@ class SerialComm(QObject):
                         # this part waits for command to be completed
                         LOGGER.debug("wait buffer")
                         while(True):
+                            if self.abort_flag.is_set():
+                                break
+
                             retry_cnt = 0
                             ret = ""
                             cmd = "?"
@@ -119,6 +159,9 @@ class SerialComm(QObject):
                             r1 = ""
 
                             while True:
+                                if self.abort_flag.is_set():
+                                    break
+
                                 self.__ser_send(ser, cmd, monitor=False)
                                 status = self.__ser_read(ser, monitor=False)
                                 if len(status) > 10:
@@ -137,6 +180,9 @@ class SerialComm(QObject):
                                 retry_cnt += 1                                
 
                             ser.timeout = backup_timeout
+
+                            if self.abort_flag.is_set():
+                                break
 
                             try:
                                 if r1[0] == "<":
@@ -166,6 +212,9 @@ class SerialComm(QObject):
                         r1 = ""
 
                         while(1):
+                            if self.abort_flag.is_set():
+                                break
+
                             self.__ser_send(ser, cmd, monitor=False)
                             status = self.__ser_read(ser, monitor=False)
                             if len(status) > 10:
@@ -193,7 +242,8 @@ class SerialComm(QObject):
                                 print("Parse error", e)
 
                         ser.timeout = backup_timeout
-                        self.__ser_send(ser, f)
+                        if not self.abort_flag.is_set():
+                            self.__ser_send(ser, f)
 
 
 
@@ -250,10 +300,12 @@ class SerialComm(QObject):
                             ser.timeout = temp
                             # TODO: return parameters to host
 
+                self.ser = None
                 ser.close()
                 self.strStatus.emit("Disconnected")
 
             except Exception as e:
+                self.ser = None
                 self.strError.emit("Error:"+str(e))
                 time.sleep(1)
 

@@ -126,6 +126,77 @@ class VLine(QFrame):
         super(VLine, self).__init__()
         self.setFrameShape(self.VLine|self.Sunken)
 
+
+class HomingDialog(QtWidgets.QDialog):
+    """Modal progress window shown while 'Home All' runs.
+
+    Application-modal so the user can't interact with the main window, but it
+    is shown with show() (not exec_()) so the main event loop keeps running
+    and the main screen keeps updating. It can only be closed programmatically
+    via finish() - Esc / Alt+F4 / close button are blocked.
+    """
+
+    def __init__(self, parent, steps):
+        super(HomingDialog, self).__init__(parent)
+        self.setWindowTitle("Homing")
+        self.setWindowModality(QtCore.Qt.ApplicationModal)
+        self.setWindowFlags(QtCore.Qt.Dialog
+                            | QtCore.Qt.CustomizeWindowHint
+                            | QtCore.Qt.WindowTitleHint)
+        self.setMinimumWidth(340)
+        self._allow_close = False
+
+        layout = QtWidgets.QVBoxLayout(self)
+
+        title = QtWidgets.QLabel("Homing in progress")
+        font = title.font()
+        font.setBold(True)
+        title.setFont(font)
+        layout.addWidget(title)
+
+        self.step_labels = []
+        for cmd, desc in steps:
+            label = QtWidgets.QLabel("[ ] " + desc)
+            layout.addWidget(label)
+            self.step_labels.append((label, desc))
+
+        self.status_label = QtWidgets.QLabel("Initializing...")
+        layout.addWidget(self.status_label)
+
+        # small and tucked into the corner to prevent accidental clicks
+        button_row = QtWidgets.QHBoxLayout()
+        button_row.addStretch()
+        self.stop_button = QtWidgets.QPushButton("Stop")
+        self.stop_button.setFixedSize(50, 22)
+        self.stop_button.setToolTip("Abort homing and reset controller")
+        button_row.addWidget(self.stop_button)
+        layout.addLayout(button_row)
+
+    def set_step_active(self, index):
+        label, desc = self.step_labels[index]
+        label.setText("[>] " + desc + "...")
+        self.status_label.setText(desc + "...")
+
+    def set_step_done(self, index):
+        label, desc = self.step_labels[index]
+        label.setText("[x] " + desc)
+
+    def set_status(self, text):
+        self.status_label.setText(text)
+
+    def finish(self):
+        self._allow_close = True
+        self.close()
+
+    def reject(self):
+        pass  # block Esc
+
+    def closeEvent(self, event):
+        if self._allow_close:
+            event.accept()
+        else:
+            event.ignore()
+
 class MyWindowClass(QtWidgets.QMainWindow, gui.Ui_MainWindow):
     def __init__(self, parent=None):
         QtWidgets.QMainWindow.__init__(self, parent)        
@@ -142,6 +213,12 @@ class MyWindowClass(QtWidgets.QMainWindow, gui.Ui_MainWindow):
         self.dbg_keypoints = None
         self.last_updated_pos = 0
         self.last_direction = {"X": 0, "Y": 0, "Z": 0, "A": 0}  # Track last movement direction for each axis
+
+        # Home All progress tracking
+        self.homing_dialog = None
+        self.homing_steps = []
+        self.homing_index = 0
+        self.homing_waiting_idle = False
 
         s_global = Status()
 
@@ -204,6 +281,8 @@ class MyWindowClass(QtWidgets.QMainWindow, gui.Ui_MainWindow):
         self.hw.strError.connect(self.strError)
         self.hw.serFeedback.connect(self.serFeedback)
         self.hw.log_rx.connect(self.add_log_response)
+        self.hw.log_tx.connect(self.homing_step_started)
+        self.hw.serReceive.connect(self.homing_step_finished)
         self.hw.moveToThread(self.thread_serial)
         self.thread_serial.started.connect(self.hw.serial_worker)
         self.thread_serial.start()
@@ -749,105 +828,119 @@ class MyWindowClass(QtWidgets.QMainWindow, gui.Ui_MainWindow):
                 self.send_gcode_with_backlash(cmd)
 
 
-    def btn_all_seek_clicked(self):
-        # If command is issued when lens is in telephoto position it stalls
-        #cmd = "$H"
-        #self.hw.send(cmd+"\n")
+    def home_all_steps(self):
+        """Build the 'Home All' command sequence for the current lens.
+
+        Returns a list of (command, description) tuples.
+        """
+        # If $H command is issued when lens is in telephoto position it stalls,
+        # therefore axes are homed one by one, in a lens-specific order.
+        def home(axis):
+            return ("$H" + axis, "Homing " + axis + " axis")
 
         if self.lens_name == "L084":
-            cmd = "$HX"
-            self.hw.send(cmd+"\n")
-            cmd = "$HY"
-            self.hw.send(cmd+"\n")
-            cmd = "$HZ"
-            self.hw.send(cmd+"\n")
-            cmd = "$HA"
-            self.hw.send(cmd+"\n")
+            return [home("X"), home("Y"), home("Z"), home("A")]
 
         if self.lens_name == "L117":
             # Workaround. Sometimes if Z is in -4..-2 Y axis can't home
             # TODO: check if HIGH, move only then
-            cmd = "G91 G0 Z2 F1000"
-            self.hw.send(cmd+"\n")
-
-            cmd = "$HA"
-            self.hw.send(cmd+"\n")
-            cmd = "$HX"
-            self.hw.send(cmd+"\n")                              
-            cmd = "$HY"
-            self.hw.send(cmd+"\n")
-            cmd = "$HZ"
-            self.hw.send(cmd+"\n")
+            return [("G91 G0 Z2 F1000", "Moving Z to safe position"),
+                    home("A"), home("X"), home("Y"), home("Z")]
 
         if self.lens_name == "L086":
             # TODO: check if HIGH, move only then
-            cmd = "G91 G0 X-12 Y-6 F1000"
-            self.hw.send(cmd+"\n")
-
-            cmd = "$HZ"
-            self.hw.send(cmd+"\n")
-            cmd = "$HX"
-            self.hw.send(cmd+"\n")
-            cmd = "$HY"
-            self.hw.send(cmd+"\n")
+            return [("G91 G0 X-12 Y-6 F1000", "Moving to safe position"),
+                    home("Z"), home("X"), home("Y")]
 
         if self.lens_name == "L085":
-            cmd = "$HX"
-            self.hw.send(cmd+"\n")
-            cmd = "$HY"
-            self.hw.send(cmd+"\n")
+            return [home("X"), home("Y")]
 
         if self.lens_name == "L085D":
-            cmd = "M120 P1"             # Enable LED
-            self.hw.send(cmd+"\n")
-            
-            cmd = "$HX"
-            self.hw.send(cmd+"\n")
-            cmd = "$HY"
-            self.hw.send(cmd+"\n")
-            
-            cmd = "M120 P0"             # Disable LED
-            self.hw.send(cmd+"\n")
+            return [("M120 P1", "Enabling LED"),
+                    home("X"), home("Y"),
+                    ("M120 P0", "Disabling LED")]
 
         if self.lens_name == "L120":
-            cmd = "$HX"
-            self.hw.send(cmd+"\n")
-            cmd = "$HY"
-            self.hw.send(cmd+"\n")
+            return [home("X"), home("Y")]
 
         if self.lens_name == "L144":
-            cmd = "$HX"
-            self.hw.send(cmd+"\n")
-            cmd = "$HY"
-            self.hw.send(cmd+"\n")
+            return [home("X"), home("Y")]
 
         if self.lens_name == "L195":
-            cmd = "$HY"
-            self.hw.send(cmd+"\n")
-            cmd = "$HX"
-            self.hw.send(cmd+"\n")
+            return [home("Y"), home("X")]
 
         if self.lens_name == "L201":
-            cmd = "$HY"
-            self.hw.send(cmd+"\n")
-            cmd = "$HX"
-            self.hw.send(cmd+"\n")
+            return [home("Y"), home("X")]
 
         if self.lens_name == "L050":
-            cmd = "$HX"
-            self.hw.send(cmd+"\n")
-            cmd = "$HY"
-            self.hw.send(cmd+"\n")
+            return [home("X"), home("Y")]
 
         if self.lens_name == "L196":
-            cmd = "$HX"
+            return [home("X"), home("Y"), home("Z"), home("A")]
+
+        return []
+
+    def btn_all_seek_clicked(self):
+        steps = self.home_all_steps()
+        if not steps:
+            return
+
+        self.homing_steps = steps
+        self.homing_index = 0
+        self.homing_waiting_idle = False
+        self.homing_dialog = HomingDialog(self, steps)
+        self.homing_dialog.stop_button.clicked.connect(self.homing_stop_clicked)
+        self.homing_dialog.show()
+
+        for cmd, desc in steps:
             self.hw.send(cmd+"\n")
-            cmd = "$HY"
-            self.hw.send(cmd+"\n")
-            cmd = "$HZ"
-            self.hw.send(cmd+"\n")
-            cmd = "$HA"
-            self.hw.send(cmd+"\n")
+
+    def homing_stop_clicked(self):
+        """Abort homing: soft-reset GRBL, then unlock so it stays operational.
+
+        Needed because a badly seated FFC connector can leave a limit switch
+        dead - the axis then keeps driving until the homing timeout. The
+        soft reset (0x18) is the only GRBL command that stops a homing cycle;
+        it leaves the controller in ALARM state, which $X clears.
+        """
+        LOGGER.warning("Homing aborted by user")
+        self.close_homing_dialog()
+        self.hw.abort()
+        # give GRBL a moment to reboot after the soft reset before unlocking
+        QTimer.singleShot(500, lambda: self.hw.send("$X\n"))
+
+    def homing_step_started(self, text):
+        """Serial worker started sending a command (log_tx signal)."""
+        if self.homing_dialog is None:
+            return
+        if self.homing_index < len(self.homing_steps):
+            cmd, desc = self.homing_steps[self.homing_index]
+            if text.strip() == cmd:
+                self.homing_dialog.set_step_active(self.homing_index)
+
+    def homing_step_finished(self, data):
+        """Controller acknowledged a command (serReceive signal).
+
+        For $H commands the 'ok' arrives only after the axis finished homing,
+        so this marks real completion of the step.
+        """
+        if self.homing_dialog is None:
+            return
+        if self.homing_index < len(self.homing_steps):
+            cmd, desc = self.homing_steps[self.homing_index]
+            if data[0] == cmd:
+                self.homing_dialog.set_step_done(self.homing_index)
+                self.homing_index += 1
+                if self.homing_index >= len(self.homing_steps):
+                    self.homing_waiting_idle = True
+                    self.homing_dialog.set_status("Waiting for motion to stop...")
+
+    def close_homing_dialog(self):
+        if self.homing_dialog is not None:
+            dialog = self.homing_dialog
+            self.homing_dialog = None
+            self.homing_waiting_idle = False
+            dialog.finish()
 
     def btn_x_seek_clicked(self):
         cmd = "$HX"
@@ -967,6 +1060,7 @@ class MyWindowClass(QtWidgets.QMainWindow, gui.Ui_MainWindow):
         if text == "Disconnected":
             self.hw_connected = False
             self.timer.stop()
+            self.close_homing_dialog()
 
         self.update_enabled_elements()
 
@@ -1006,6 +1100,7 @@ class MyWindowClass(QtWidgets.QMainWindow, gui.Ui_MainWindow):
 
     def strError(self, text):
         LOGGER.error(text)
+        self.close_homing_dialog()
         msg = QMessageBox()
         msg.setIcon(QMessageBox.Critical)
         msg.setText("Error")
@@ -1247,6 +1342,16 @@ class MyWindowClass(QtWidgets.QMainWindow, gui.Ui_MainWindow):
         self.s_global = s
 
         self.last_updated_pos = time.time()
+
+        # Home All progress: close the dialog once everything is homed and
+        # the controller reports Idle; abort on Alarm.
+        if self.homing_dialog is not None:
+            if str(s.status).startswith("Alarm"):
+                self.close_homing_dialog()
+                QMessageBox.critical(self, "Homing failed",
+                                     "Controller reported ALARM state during homing.")
+            elif self.homing_waiting_idle and str(s.status) == "Idle":
+                self.close_homing_dialog()
 
 
     def closeEvent(self, event):
